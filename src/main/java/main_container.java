@@ -10,19 +10,21 @@ public class main_container {
 
     Runtime rt;
     ContainerController container;
-
+    public double findAngle(double p0x,double p0y,double p1x,double p1y,double p2x,double p2y) {
+        double a = Math.pow(p1x-p0x,2) + Math.pow(p1y-p0y,2),
+                b = Math.pow(p1x-p2x,2) + Math.pow(p1y-p2y,2),
+                c = Math.pow(p2x-p0x,2) + Math.pow(p2y - p0y, 2);
+        return 57.2958*Math.acos( (a+b-c) / Math.sqrt(4*a*b) );
+    }
     public static void main(String[] args) {
+
         main_container a = new main_container();
 
         a.initMainContainerInPlatform("localhost", "9888", "MainContainer");
-
+        a.startAgentInPlatform("coordinator", "agents.coordinator");
         a.startAgentInPlatform("left_agent", "agents.left_agent");
         a.startAgentInPlatform("right_agent", "agents.right_agent");
-        a.startAgentInPlatform("coordinator", "agents.coordinator");
-
-
-
-
+        a.startAgentInPlatform("middle_agent", "agents.middle_agent");
 
     }
 

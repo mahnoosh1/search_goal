@@ -6,6 +6,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -24,6 +25,7 @@ public class coordinator extends Agent {
     private  int id =4;
     private  int n =0;
     private ArrayList<Integer> x = new ArrayList<>();
+
     protected void setup() {
         super.setup();
         System.out.println("start "+id);
@@ -39,65 +41,52 @@ public class coordinator extends Agent {
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-        addBehaviour(new coordinator.MakeContact());
         addBehaviour(new coordinator.Receiver());
-        addBehaviour(new coordinator.Results(this,5000));
 
     }
-    private class MakeContact extends OneShotBehaviour {
-        public void action() {
-
+    public ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> aggregate(ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> main, ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> sub) {
+        ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> total = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
+        for (String k1: main.keySet()) {
+            if (sub.containsKey(k1)) {
+                ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
+                temp.put("val", (main.get(k1).get("val")+sub.get(k1).get("val"))/2);
+                temp.put("diff", (main.get(k1).get("diff")+sub.get(k1).get("diff"))/2);
+                total.put(k1, temp);
+            }
+            else {
+                total.put(k1,main.get(k1));
+            }
         }
+        for (String k2: sub.keySet()) {
+            if (!total.containsKey(k2)) {
+                total.put(k2, sub.get(k2));
+            }
+        }
+        return total;
     }
-
-
     private class Receiver extends CyclicBehaviour {
 
         public void action() {
-
             ACLMessage msg = receive();
             if (msg != null) {
-                System.out.println("mesage daryaft shod az "+msg.getSender().getName());
-                n++;
-                if (n==2) {
-                    try {
-                        ArrayList<Integer> m = (ArrayList<Integer>) msg.getContentObject();
-                        for (int i=0;i<m.size();i++) {
-                            x.add(m.get(i));
-                        }
-
-                    } catch (UnreadableException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("payam koli");
-                    System.out.println(x);
-                }
-                if (n == 3) {
-                    n = 1;
-                    x = new ArrayList<Integer>();
-                    ArrayList<Integer> m = null;
-                    try {
-                        m = (ArrayList<Integer>) msg.getContentObject();
-                    } catch (UnreadableException e) {
-                        e.printStackTrace();
-                    }
-                    for (int i=0;i<m.size();i++) {
-                        x.add(m.get(i));
-                    }
-                }
-                else {
-                    try {
-                        ArrayList<Integer> m = (ArrayList<Integer>) msg.getContentObject();
-                        for (int i=0;i<m.size();i++) {
-                            x.add(m.get(i));
-                        }
-
-                    } catch (UnreadableException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                //Receive coordinates from each pharmacy
+                System.out.println("payam daryaft shod");
+                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> table1 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
+                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> table0_2 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
+                table1 = aggregate(left_agent.table1.Q_vals, right_agent.table1.Q_vals);
+                table1= aggregate(table1, middle_agent.table1.Q_vals);
+                table0_2 = aggregate(left_agent.table0_2.Q_vals, right_agent.table0_2.Q_vals);
+                table0_2= aggregate(table0_2 ,middle_agent.table0_2.Q_vals);
+                System.out.println("table1");
+                System.out.println(table1);
+                System.out.println("table2");
+                System.out.println(table0_2);
+                left_agent.table1.Q_vals = table1;
+                right_agent.table1.Q_vals = table1;
+                middle_agent.table1.Q_vals = table1;
+                left_agent.table0_2.Q_vals = table0_2;
+                right_agent.table0_2.Q_vals = table0_2;
+                middle_agent.table0_2.Q_vals = table0_2;
+                System.out.println("update shod table ha");
                 if (msg.getPerformative() == ACLMessage.INFORM) {
 
 
@@ -108,20 +97,7 @@ public class coordinator extends Agent {
         }
     }
 
-    private class Results extends TickerBehaviour {
 
-        public Results(Agent a, long timeout)
-        {
-            super(a, timeout);
-        }
-        protected void onTick() {
-            //System.out.println("action "+id);
-            System.out.println("send message to"+ 1);
-
-
-
-        }
-    }
 }
 
 
