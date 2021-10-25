@@ -40,13 +40,20 @@ public class left_agent extends Agent {
     private int ent_left_mid_y = 105;
     private int ent_right_mid_x = 200;
     private int ent_right_mid_y = 205;
-    private int d=30;
-    private int a=10;
+    private int d=10;
+    private int a=3;
+    PrintWriter writer = null;
     public ArrayList<Integer> avg_step = new ArrayList<Integer>();
 
     protected void setup() {
         super.setup();
-        System.out.println("start "+id);
+        try {
+            writer = new PrintWriter("Agent"+id+"info"+".txt", "UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         this.initial();
         this.actions.add("up");this.actions.add("down");this.actions.add("left");this.actions.add("right");
         for(int i=0;i<10;i++) {
@@ -68,9 +75,10 @@ public class left_agent extends Agent {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
         return this.actions.get(randomNum);
     }
-    public void updatePosition(String action) {
+    public Boolean updatePosition(String action) {
         int x_new = 0;
         int y_new = 0;
+        Boolean hitBlock = false;
         if (action == "up"){
             y_new = this.y+this.move_step;
             x_new = this.x;
@@ -88,9 +96,51 @@ public class left_agent extends Agent {
             y_new = this.y;
         }
         if ((x_new >= 0 && x_new<300) && (y_new>=0 && y_new<300)){
-            this.y = y_new;
-            this.x = x_new;
+            hitBlock = !isPath(x_new,y_new);
+            if (!hitBlock) {
+                this.x = x_new;
+                this.y=y_new;
+            }
         }
+        else {
+            hitBlock=true;
+        }
+
+        return hitBlock;
+    }
+    public Boolean isPath(int x, int y) {
+        Boolean is = true;
+        if (x==100) {
+            Boolean find=false;
+            for (int i=0;i<entrances_left.size();i++) {
+                if (y==entrances_left.get(i).getY()){
+                    find=true;
+                    break;
+                }
+            }
+            if (find==true) {
+                is=true;
+            }
+            else {
+                is=false;
+            }
+        }
+        if (x==200) {
+            Boolean find=false;
+            for (int i=0;i<entrances_right.size();i++) {
+                if (y==entrances_right.get(i).getY()){
+                    find=true;
+                    break;
+                }
+            }
+            if (find==true) {
+                is=true;
+            }
+            else {
+                is=false;
+            }
+        }
+        return is;
     }
     public Boolean inBound(String action) {
         int x_new = 0;
@@ -140,26 +190,31 @@ public class left_agent extends Agent {
                 c = Math.pow(p2x-p0x,2) + Math.pow(p2y - p0y, 2);
         return 57.2958*Math.acos( (a+b-c) / Math.sqrt(4*a*b) );
     }
-    public Double calcReward() {
+    public Double calcReward(Boolean hitBlock) {
         Double r = 0.0;
-        if(this.section == 0){
-            r = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
+        if (hitBlock) {
+            r=-100.0;
+        } else {
+            if(this.section == 0){
+                r = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
+            }
+            if(this.section == 1){
+                r = this.dist(this.x, this.y, this.x_goal, this.y_goal);
+            }
+            if(this.section == 2){
+                r = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
+            }
+            if (r==0) {
+                r= 100.0;
+            }
+            else
+                r=1/r;
         }
-        if(this.section == 1){
-            r = this.dist(this.x, this.y, this.x_goal, this.y_goal);
-        }
-        if(this.section == 2){
-            r = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
-        }
-        if (r==0) {
-            return 10000.0;
-        }
-        else
-            return 1/r;
+        return r;
     }
-    public String calcState(String action) {
+    public String calcState(String action, Boolean hitBlock) {
         String s = "";
-        Integer diff = this.diffAngleState(action);
+        Integer diff = this.diffAngleState(action, hitBlock);
         if (this.section == 0) {
             Double x1 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
             Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
@@ -202,10 +257,10 @@ public class left_agent extends Agent {
         }
         return s;
     }
-    public String nextPosState(String action) {
+    public String nextPosState(String action, Boolean hitBlock) {
         String nextstate = "";
         ArrayList<Integer> nextpos = new ArrayList<Integer>();
-        nextpos = this.getNextPos(action);
+        nextpos = this.getNextPos(action, hitBlock);
         if (nextpos.get(0)<100) {
             Double x1 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
             Double x2 = dist(nextpos.get(0), nextpos.get(1),ent_left_mid_x,ent_left_mid_y);
@@ -227,36 +282,41 @@ public class left_agent extends Agent {
         return nextstate;
 
     }
-    public ArrayList<Integer> getNextPos(String action) {
+    public ArrayList<Integer> getNextPos(String action, Boolean hitBlock) {
         ArrayList<Integer> pos = new ArrayList<Integer>();
         int x_new = 0;
         int y_new = 0;
-        if (action == "up"){
-            y_new = this.y+this.move_step;
-            x_new = this.x;
+        if (hitBlock) {
+            x_new= this.x;
+            y_new=this.y;
         }
-        if (action == "down"){
-            y_new = this.y-this.move_step;
-            x_new = this.x;
+        else {
+            if (action == "up"){
+                y_new = this.y+this.move_step;
+                x_new = this.x;
+            }
+            if (action == "down"){
+                y_new = this.y-this.move_step;
+                x_new = this.x;
+            }
+            if (action == "left"){
+                x_new = this.x-this.move_step;
+                y_new = this.y;
+            }
+            if (action == "right"){
+                x_new = this.x+this.move_step;
+                y_new = this.y;
+            }
         }
-        if (action == "left"){
-            x_new = this.x-this.move_step;
-            y_new = this.y;
-        }
-        if (action == "right"){
-            x_new = this.x+this.move_step;
-            y_new = this.y;
-        }
-
         pos.add(0, x_new);
         pos.add(1, y_new);
         return  pos;
     }
-    public Double diffAngleDouble(String action) {
+    public Double diffAngleDouble(String action, Boolean hitBlock) {
         Double diff = 0.0;
         Double x1 =0.0;
         Double x2=0.0;
-        ArrayList<Integer> nextPos = this.getNextPos(action);
+        ArrayList<Integer> nextPos = this.getNextPos(action, hitBlock);
         if (this.section == 0) {
             x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_left_mid_x, this.ent_left_mid_y);
             x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
@@ -271,11 +331,11 @@ public class left_agent extends Agent {
         }
         return x1-x2;
     }
-    public Integer diffAngleState(String action) {
+    public Integer diffAngleState(String action, Boolean hitBlock) {
         Double diff = 0.0;
         Double x1 =0.0;
         Double x2=0.0;
-        ArrayList<Integer> nextPos = this.getNextPos(action);
+        ArrayList<Integer> nextPos = this.getNextPos(action, hitBlock);
         if (this.section == 0) {
             x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_left_mid_x, this.ent_left_mid_y);
             x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
@@ -291,33 +351,45 @@ public class left_agent extends Agent {
         return Math.toIntExact(Math.round((x1 - x2) / this.a));
     }
 
-    public int getDecider(int episode) {
-        if (episode >=0 && episode <=10) {
-            decider = 0;
-        }
-        if (episode >10 && episode <=40) {
-            decider = 1;
-        }
-        if (episode >40 && episode <=80) {
-            decider = 2;
-        }
-        if (episode >80 && episode <=120) {
-            decider = 3;
-        }
-        if (episode >120 && episode <=160) {
-            decider = 4;
-        }
-        if (episode >160 && episode <=200) {
-            decider = 5;
-        }
-        if (episode >200 && episode <=250) {
-            decider = 6;
-        }
-        if (episode >250 && episode <=350) {
-            decider = 7;
-        }
-        if (episode >350 && episode <=500) {
-            decider = 8;
+    public int getDecider(int episode, int trial) {
+        if (trial>=0 && trial<=5) {
+            if (episode >=0 && episode <=10) {
+                decider = 0;
+            }
+            if (episode >10 && episode <=20) {
+                decider = 1;
+            }
+            if (episode >20 && episode <=30) {
+                decider = 2;
+            }
+            if (episode >30 && episode <=40) {
+                decider = 3;
+            }
+            if (episode >40 && episode <=50) {
+                decider = 4;
+            }
+            if (episode >50 && episode <=150) {
+                decider = 5;
+            }
+            if (episode >150 && episode <=250) {
+                decider = 6;
+            }
+            if (episode >250 && episode <=350) {
+                decider = 7;
+            }
+            if (episode >350 && episode <=500) {
+                decider = 8;
+            }
+        } else {
+            if (episode >=0 && episode<=50) {
+                decider=6;
+            }
+            if (episode>50 && episode<=250) {
+                decider=7;
+            }
+            if (episode>250) {
+                decider=8;
+            }
         }
         return decider;
     }
@@ -372,6 +444,7 @@ public class left_agent extends Agent {
                         if (this.section==2){
                             action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
+
                         break;
                 }
             }
@@ -398,6 +471,7 @@ public class left_agent extends Agent {
                         if (this.section==2){
                             action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
+
                         break;
                 }
             }
@@ -424,6 +498,7 @@ public class left_agent extends Agent {
                         if (this.section==2){
                             action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
+
                         break;
                 }
             }
@@ -450,6 +525,7 @@ public class left_agent extends Agent {
                         if (this.section==2){
                             action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
+
                         break;
                 }
             }
@@ -476,6 +552,7 @@ public class left_agent extends Agent {
                         if (this.section==2){
                             action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
+
                         break;
                 }
             }
@@ -502,6 +579,7 @@ public class left_agent extends Agent {
                         if (this.section==2){
                             action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
+
                         break;
                 }
             }
@@ -528,6 +606,7 @@ public class left_agent extends Agent {
                         if (this.section==2){
                             action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
+
                         break;
                 }
             }
@@ -554,6 +633,7 @@ public class left_agent extends Agent {
                         if (this.section==2){
                             action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
+
                         break;
                 }
             }
@@ -580,6 +660,7 @@ public class left_agent extends Agent {
                         if (this.section==2){
                             action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
+
                         break;
                 }
             }
@@ -627,21 +708,20 @@ public class left_agent extends Agent {
             if (trial<max_trial) {
                 if (episode<max_episodes) {
                     int step_goal = 2000;
-                    System.out.println("Agent "+id+" is in episode "+ episode);
+                    initial();
                     for(int i=0;i<max_step;i++) {
-                        getDecider(episode);
+                        System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial);
+                        getDecider(episode, trial);
                         defineSection();
-                        if (section==1) {
-                            System.out.println("Agent "+id+" montaghel shod be section 1");
-                        }
                         String stateHalf = calcStateHalf();
                         String action = explorExplot(decider, stateHalf);
                         if (inBound(action)) {
-                            updatePosition(action);
-                            String state = calcState(action);
-                            Double reward = calcReward();
-                            String nextpos= nextPosState(action);
-                            Double diff = diffAngleDouble(action);
+                            Boolean hitBlock = updatePosition(action);
+                            String state = calcState(action, hitBlock);
+                            Double reward = calcReward(hitBlock);
+                            String nextpos= nextPosState(action, hitBlock);
+                            Double diff = diffAngleDouble(action,hitBlock);
+
                             if (section == 0 || section==2){
                                 table0_2.update(state,nextpos,reward,diff);
                             }
@@ -650,9 +730,9 @@ public class left_agent extends Agent {
                             }
 
                         } else {
-                            String state = calcState(action);
+                            String state = calcState(action,true);
                             Double reward = -100.0;
-                            String nextpos= calcState(action);
+                            String nextpos= calcState(action, true);
                             Double diff = 0.0;
                             if (section == 0 || section==2){
                                 table0_2.update(state,nextpos,reward, (diff));
@@ -671,52 +751,55 @@ public class left_agent extends Agent {
                             ACLMessage mensagem = new ACLMessage(ACLMessage.CFP);
                             if(section == 0 || section == 2) {
                                 mensagem.setContentObject( table0_2.Q_vals);
-                                System.out.println("Agent "+id+" send table2 message to coordinator" );
                             }
                             if (section==1) {
                                 mensagem.setContentObject(table1.Q_vals);
                                 mensagem.setContent("table1");
-                                System.out.println("Agent "+id+" send table1 message to coordinator" );
                             }
 
                             AID receiver = new AID();
                             receiver.setLocalName("coordinator");
                             mensagem.addReceiver(receiver);
                             myAgent.send(mensagem);
-                            Thread.sleep(2000);
+                            Thread.sleep(1000);
                         } catch (FIPAException | InterruptedException | IOException e) {
                             e.printStackTrace();
                         }
                         //////////////////////////
                         if (hit_goal()) {
-                            System.out.println("Agent "+id+" hit the goal in episode "+episode);
+                            writer.println("Agent "+id+" hit the goal in episode "+episode );
+                            writer.flush();
                             step_goal = i;
                             break;
                         }
                     }
                     episode++;
                     avg_step.add(step_goal);
-                    if (episode == max_episodes) {
-                        trial++;
-                        System.out.println("Agent "+id +"  trial "+ trial+" shoro shod");
-                        episode = 0;
-                        step =0;
-                        PrintWriter writer = null;
-                        try {
-                            writer = new PrintWriter("Agent"+id+"trial"+(trial-1)+".txt", "UTF-8");
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                        writer.println(avg_step);
-                        writer.println("size: "+avg_step.size());
-                        writer.close();
-                        avg_step = new ArrayList<Integer>();
+                }
+                if (episode == max_episodes) {
+                    trial++;
+                    writer.println("Agent "+id +"  trial "+ trial+" shoro shod");
+                    writer.flush();
+                    episode = 0;
+                    step =0;
+                    initial();
+                    PrintWriter writer1 = null;
+                    try {
+                        writer1 = new PrintWriter("Agent"+id+"trial"+(trial-1)+".txt", "UTF-8");
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
                     }
-
+                    writer1.println(avg_step);
+                    writer1.println("size: "+avg_step.size());
+                    writer1.close();
+                    avg_step = new ArrayList<Integer>();
                 }
 
+            }
+            if (trial==max_trial) {
+                writer.close();
             }
         }
     }

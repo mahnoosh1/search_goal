@@ -93,20 +93,22 @@ public class Q_table {
     }
 
     public String mapAction(int x, int y, int x_goal, int y_goal, int section, Double diff_proper) {
-        Double diff_close = 1000.0;
+        Double diff_close = 1000000000.0;
         String action = "";
          for (int i=0;i<this.actions.size();i++) {
              if(section == 0 || section ==1) {
                  Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_left_mid_x,ent_left_mid_y);
-                 if (diff_proper-diff_temp < diff_close) {
-                     diff_close = diff_proper-diff_temp ;
+                 Double distance = Math.abs(diff_proper-diff_temp);
+                 if (distance < diff_close) {
+                     diff_close = distance;
                      action = this.actions.get(i);
                  }
              }
              if(section == 2) {
                  Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_right_mid_x,ent_right_mid_y);
-                 if (diff_proper-diff_temp < diff_close) {
-                     diff_close = diff_proper-diff_temp ;
+                 Double distance = Math.abs(diff_proper-diff_temp);
+                 if (distance< diff_close) {
+                     diff_close = distance;
                      action = this.actions.get(i);
                  }
              }
@@ -114,7 +116,7 @@ public class Q_table {
          return action;
     }
     public String getAction(String temp, int x, int y, int x_goal, int y_goal, int section) {
-        Double Qmax = -10000.0;
+        Double Qmax = -100000000.0;
         String action = null;
         Double diff_proper = 0.0;
         for (String k : this.Q_vals.keySet()) {
