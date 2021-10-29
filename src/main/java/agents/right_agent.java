@@ -31,8 +31,9 @@ public class right_agent extends Agent {
     private int y =0;
     private int section = 0;
     private ArrayList<String> actions = new ArrayList<String>();
+    public static Q_table table0 = new Q_table();
     public static Q_table table1 = new Q_table();
-    public static  Q_table table0_2 = new Q_table();
+    public static Q_table table2 = new Q_table();
     private int x_goal = 150;
     private  int y_goal = 270;
     private int move_step = 5;
@@ -42,8 +43,9 @@ public class right_agent extends Agent {
     private int ent_left_mid_y = 105;
     private int ent_right_mid_x = 200;
     private int ent_right_mid_y = 205;
-    private int d=10;
-    private int a=3;
+    private int d=20;
+    private int a=10;
+    public Boolean rand=true;
     PrintWriter writer = null;
     public ArrayList<Integer> avg_step = new ArrayList<Integer>();
 
@@ -77,7 +79,7 @@ public class right_agent extends Agent {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
         return this.actions.get(randomNum);
     }
-    public Boolean updatePosition(String action) {
+    public Boolean updatePosition(String action, Boolean update) {
         int x_new = 0;
         int y_new = 0;
         Boolean hitBlock = false;
@@ -100,8 +102,10 @@ public class right_agent extends Agent {
         if ((x_new >= 0 && x_new<300) && (y_new>=0 && y_new<300)){
             hitBlock = !isPath(x_new,y_new);
             if (!hitBlock) {
-                this.x = x_new;
-                this.y=y_new;
+                if (update) {
+                    this.x = x_new;
+                    this.y=y_new;
+                }
             }
         }
         else {
@@ -127,7 +131,7 @@ public class right_agent extends Agent {
                 is=false;
             }
         }
-        if (x==200) {
+        else if (x==200) {
             Boolean find=false;
             for (int i=0;i<entrances_right.size();i++) {
                 if (y==entrances_right.get(i).getY()){
@@ -192,19 +196,19 @@ public class right_agent extends Agent {
                 c = Math.pow(p2x-p0x,2) + Math.pow(p2y - p0y, 2);
         return 57.2958*Math.acos( (a+b-c) / Math.sqrt(4*a*b) );
     }
-    public Double calcReward(Boolean hitBlock) {
+    public Double calcReward(int x, int y,Boolean hitBlock) {
         Double r = 0.0;
         if (hitBlock) {
             r=-100.0;
         } else {
             if(this.section == 0){
-                r = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
+                r = this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y);
             }
             if(this.section == 1){
-                r = this.dist(this.x, this.y, this.x_goal, this.y_goal);
+                r = this.dist(x, y, this.x_goal, this.y_goal);
             }
             if(this.section == 2){
-                r = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
+                r = this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y);
             }
             if (r==0) {
                 r= 100.0;
@@ -264,20 +268,20 @@ public class right_agent extends Agent {
         ArrayList<Integer> nextpos = new ArrayList<Integer>();
         nextpos = this.getNextPos(action, hitBlock);
         if (nextpos.get(0)<100) {
-            Double x1 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
-            Double x2 = dist(nextpos.get(0), nextpos.get(1),ent_left_mid_x,ent_left_mid_y);
+            Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_left_mid_x,ent_left_mid_y);
+            Double x2 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
             Double x3= findAngle(x_goal,y_goal, nextpos.get(0), nextpos.get(1), ent_left_mid_x,ent_left_mid_y);
             nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
         }
         if (nextpos.get(0)>=100 && nextpos.get(0)<200) {
-            Double x1 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
-            Double x2 = dist(nextpos.get(0), nextpos.get(1),ent_left_mid_x,ent_left_mid_y);
+            Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_left_mid_x,ent_left_mid_y);
+            Double x2 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
             Double x3= findAngle(x_goal,y_goal, nextpos.get(0), nextpos.get(1), ent_left_mid_x,ent_left_mid_y);
             nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
         }
         if (nextpos.get(0)>=200) {
-            Double x1 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
-            Double x2 = dist(nextpos.get(0), nextpos.get(1),ent_right_mid_x,ent_right_mid_y);
+            Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_right_mid_x,ent_right_mid_y);
+            Double x2 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
             Double x3= findAngle(x_goal,y_goal, nextpos.get(0), nextpos.get(1), ent_right_mid_x,ent_right_mid_y);
             nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
         }
@@ -355,31 +359,31 @@ public class right_agent extends Agent {
 
     public int getDecider(int episode, int trial) {
         if (trial>=0 && trial<=5) {
-            if (episode >=0 && episode <=10) {
+            if (episode >=0 && episode <=30) {
                 decider = 0;
             }
-            if (episode >10 && episode <=20) {
+            if (episode >30 && episode <=60) {
                 decider = 1;
             }
-            if (episode >20 && episode <=30) {
+            if (episode >60 && episode <=90) {
                 decider = 2;
             }
-            if (episode >30 && episode <=40) {
+            if (episode >90 && episode <=120) {
                 decider = 3;
             }
-            if (episode >40 && episode <=50) {
+            if (episode >120 && episode <=150) {
                 decider = 4;
             }
-            if (episode >50 && episode <=150) {
+            if (episode >150 && episode <=200) {
                 decider = 5;
             }
-            if (episode >150 && episode <=250) {
+            if (episode >200 && episode <=300) {
                 decider = 6;
             }
-            if (episode >250 && episode <=350) {
+            if (episode >300 && episode <=400) {
                 decider = 7;
             }
-            if (episode >350 && episode <=500) {
+            if (episode >400 && episode <=500) {
                 decider = 8;
             }
         } else {
@@ -397,11 +401,11 @@ public class right_agent extends Agent {
     }
     private ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> All_Q_vals(String state) {
         ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> Q = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
-        if (this.section == 0 || this.section == 2) {
-            for (String k : table0_2.Q_vals.keySet()) {
+        if (this.section == 0) {
+            for (String k : table0.Q_vals.keySet()) {
                 if (k.contains(state)){
                     ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
-                    temp = table0_2.Q_vals.get(k);
+                    temp = table0.Q_vals.get(k);
                     Q.put(k, temp);
                 }
             }
@@ -411,6 +415,15 @@ public class right_agent extends Agent {
                 if (k.contains(state)){
                     ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
                     temp = table1.Q_vals.get(k);
+                    Q.put(k, temp);
+                }
+            }
+        }
+        if (this.section == 2) {
+            for (String k : table2.Q_vals.keySet()) {
+                if (k.contains(state)){
+                    ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
+                    temp = table2.Q_vals.get(k);
                     Q.put(k, temp);
                 }
             }
@@ -435,19 +448,19 @@ public class right_agent extends Agent {
                     case 7:
                     case 8:
                         action = this.randomAction();
+                        this.rand=true;
                         break;
                     case 9:
+                        this.rand=false;
                         if (this.section == 0){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table0.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
                         }
                         if (this.section==1){
                             action = table1.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
                         }
                         if (this.section==2){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
-
-                        break;
                 }
             }
             if (decider == 1) {
@@ -461,17 +474,19 @@ public class right_agent extends Agent {
                     case 6:
                     case 7:
                         action = this.randomAction();
+                        this.rand=true;
                         break;
                     case 8:
                     case 9:
+                        this.rand=false;
                         if (this.section == 0){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table0.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
                         }
                         if (this.section==1){
                             action = table1.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
                         }
                         if (this.section==2){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
 
                         break;
@@ -487,18 +502,20 @@ public class right_agent extends Agent {
                     case 5:
                     case 6:
                         action = this.randomAction();
+                        this.rand=true;
                         break;
                     case 7:
                     case 8:
                     case 9:
+                        this.rand=false;
                         if (this.section == 0){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table0.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
                         }
                         if (this.section==1){
                             action = table1.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
                         }
                         if (this.section==2){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
 
                         break;
@@ -513,19 +530,21 @@ public class right_agent extends Agent {
                     case 4:
                     case 5:
                         action = this.randomAction();
+                        this.rand=true;
                         break;
                     case 6:
                     case 7:
                     case 8:
                     case 9:
+                        this.rand=false;
                         if (this.section == 0){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table0.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
                         }
                         if (this.section==1){
                             action = table1.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
                         }
                         if (this.section==2){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
 
                         break;
@@ -539,20 +558,22 @@ public class right_agent extends Agent {
                     case 3:
                     case 4:
                         action = this.randomAction();
+                        this.rand=true;
                         break;
                     case 5:
                     case 6:
                     case 7:
                     case 8:
                     case 9:
+                        this.rand=false;
                         if (this.section == 0){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table0.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
                         }
                         if (this.section==1){
                             action = table1.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
                         }
                         if (this.section==2){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
 
                         break;
@@ -565,6 +586,7 @@ public class right_agent extends Agent {
                     case 2:
                     case 3:
                         action = this.randomAction();
+                        this.rand=true;
                         break;
                     case 4:
                     case 5:
@@ -572,14 +594,15 @@ public class right_agent extends Agent {
                     case 7:
                     case 8:
                     case 9:
+                        this.rand=false;
                         if (this.section == 0){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table0.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
                         }
                         if (this.section==1){
                             action = table1.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
                         }
                         if (this.section==2){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
 
                         break;
@@ -591,6 +614,7 @@ public class right_agent extends Agent {
                     case 1:
                     case 2:
                         action = this.randomAction();
+                        this.rand=true;
                         break;
                     case 3:
                     case 4:
@@ -599,14 +623,15 @@ public class right_agent extends Agent {
                     case 7:
                     case 8:
                     case 9:
+                        this.rand=false;
                         if (this.section == 0){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table0.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
                         }
                         if (this.section==1){
                             action = table1.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
                         }
                         if (this.section==2){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
 
                         break;
@@ -617,6 +642,7 @@ public class right_agent extends Agent {
                     case 0:
                     case 1:
                         action = this.randomAction();
+                        this.rand=true;
                         break;
                     case 2:
                     case 3:
@@ -626,14 +652,15 @@ public class right_agent extends Agent {
                     case 7:
                     case 8:
                     case 9:
+                        this.rand=false;
                         if (this.section == 0){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table0.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
                         }
                         if (this.section==1){
                             action = table1.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
                         }
                         if (this.section==2){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
 
                         break;
@@ -643,6 +670,7 @@ public class right_agent extends Agent {
                 switch (r1.nextInt(10)) {
                     case 0:
                         action = this.randomAction();
+                        this.rand=true;
                         break;
                     case 1:
                     case 2:
@@ -653,14 +681,15 @@ public class right_agent extends Agent {
                     case 7:
                     case 8:
                     case 9:
+                        this.rand=false;
                         if (this.section == 0){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table0.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
                         }
                         if (this.section==1){
                             action = table1.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
                         }
                         if (this.section==2){
-                            action = table0_2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table2.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
                         }
 
                         break;
@@ -669,6 +698,7 @@ public class right_agent extends Agent {
 
         }
         else {
+            this.rand = true;
             action = this.randomAction();
         }
         return  action;
@@ -680,7 +710,23 @@ public class right_agent extends Agent {
         }
         return hit;
     }
-
+    public String validate(String action, String action1, int episode) {
+        String ax="";
+        Boolean hitBlock = updatePosition(action, false);
+        ArrayList<Integer> pos = getNextPos(action,hitBlock);
+        Double reward = calcReward(pos.get(0), pos.get(1),hitBlock);
+        //////////////////
+        Boolean hitBlock1 = updatePosition(action1, false);
+        ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
+        Double reward1 = calcReward(pos1.get(0), pos1.get(1),hitBlock1);
+        if (reward1>reward && episode>30) {
+            ax=action1;
+        }
+        else {
+            ax=action;
+        }
+        return ax;
+    }
     private class Receiver extends CyclicBehaviour {
 
         public void action() {
@@ -706,7 +752,6 @@ public class right_agent extends Agent {
             super(a, timeout);
         }
         protected void onTick() {
-
             if (trial<max_trial) {
                 if (episode<max_episodes) {
                     int step_goal = 2000;
@@ -717,18 +762,34 @@ public class right_agent extends Agent {
                         defineSection();
                         String stateHalf = calcStateHalf();
                         String action = explorExplot(decider, stateHalf);
+                        String action1="";
+                        if (rand==true) {
+                            if (section == 0){
+                                action1 = table0.getAction(stateHalf,x, y, x_goal, y_goal, 0);
+                            }
+                            if (section==1){
+                                action1 = table1.getAction(stateHalf,x, y, x_goal, y_goal, 1);
+                            }
+                            if (section==2){
+                                action1 = table2.getAction(stateHalf,x, y, x_goal,  y_goal, 2);
+                            }
+                            action=validate(action,action1,episode);
+                        }
                         if (inBound(action)) {
-                            Boolean hitBlock = updatePosition(action);
+                            Boolean hitBlock = updatePosition(action,true);
+
                             String state = calcState(action, hitBlock);
-                            Double reward = calcReward(hitBlock);
+                            Double reward = calcReward(x,y,hitBlock);
                             String nextpos= nextPosState(action, hitBlock);
                             Double diff = diffAngleDouble(action,hitBlock);
-
-                            if (section == 0 || section==2){
-                                table0_2.update(state,nextpos,reward,diff);
+                            if (section == 0){
+                                table0.update(state,nextpos,reward,diff);
                             }
                             if (section==1) {
                                 table1.update(state,nextpos,reward,diff);
+                            }
+                            if (section==2) {
+                                table2.update(state,nextpos,reward,diff);
                             }
 
                         } else {
@@ -736,11 +797,14 @@ public class right_agent extends Agent {
                             Double reward = -100.0;
                             String nextpos= calcState(action, true);
                             Double diff = 0.0;
-                            if (section == 0 || section==2){
-                                table0_2.update(state,nextpos,reward, (diff));
+                            if (section == 0){
+                                table0.update(state,nextpos,reward, (diff));
                             }
                             if (section==1) {
                                 table1.update(state,nextpos,reward, (diff));
+                            }
+                            if (section == 2){
+                                table2.update(state,nextpos,reward, (diff));
                             }
                         }
                         ///////////////////////////
@@ -751,25 +815,26 @@ public class right_agent extends Agent {
                             dfd.addServices(sd);
                             DFAgentDescription[] result = DFService.search(this.myAgent, dfd);
                             ACLMessage mensagem = new ACLMessage(ACLMessage.CFP);
-                            if(section == 0 || section == 2) {
-                                mensagem.setContentObject( table0_2.Q_vals);
+                            if(section == 0) {
+                                mensagem.setContentObject( table0.Q_vals);
                             }
                             if (section==1) {
                                 mensagem.setContentObject(table1.Q_vals);
-                                mensagem.setContent("table1");
                             }
-
+                            if(section == 2) {
+                                mensagem.setContentObject( table2.Q_vals);
+                            }
                             AID receiver = new AID();
                             receiver.setLocalName("coordinator");
                             mensagem.addReceiver(receiver);
                             myAgent.send(mensagem);
-                            Thread.sleep(1000);
+                            Thread.sleep(500);
                         } catch (FIPAException | InterruptedException | IOException e) {
                             e.printStackTrace();
                         }
                         //////////////////////////
                         if (hit_goal()) {
-                            writer.println("Agent "+id+" hit the goal in episode "+episode );
+                            writer.println("Agent "+id+" hit the goal in episode "+episode +" in step "+i);
                             writer.flush();
                             step_goal = i;
                             break;
@@ -807,5 +872,4 @@ public class right_agent extends Agent {
     }
 
 }
-
 

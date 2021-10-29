@@ -70,18 +70,23 @@ public class coordinator extends Agent {
             ACLMessage msg = receive();
             if (msg != null) {
                 ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> table1 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
-                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> table0_2 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
+                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> table0 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
+                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> table2 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
                 table1 = aggregate(left_agent.table1.Q_vals, right_agent.table1.Q_vals);
                 table1= aggregate(table1, middle_agent.table1.Q_vals);
-                table0_2 = aggregate(left_agent.table0_2.Q_vals, right_agent.table0_2.Q_vals);
-                table0_2= aggregate(table0_2 ,middle_agent.table0_2.Q_vals);
-
+                table0 = aggregate(left_agent.table0.Q_vals, right_agent.table0.Q_vals);
+                table0= aggregate(table0 ,middle_agent.table0.Q_vals);
+                table2= aggregate(left_agent.table2.Q_vals, right_agent.table2.Q_vals);
+                table2= aggregate(table0 ,middle_agent.table2.Q_vals);
                 left_agent.table1.Q_vals = table1;
                 right_agent.table1.Q_vals = table1;
                 middle_agent.table1.Q_vals = table1;
-                left_agent.table0_2.Q_vals = table0_2;
-                right_agent.table0_2.Q_vals = table0_2;
-                middle_agent.table0_2.Q_vals = table0_2;
+                left_agent.table0.Q_vals = table0;
+                right_agent.table0.Q_vals = table0;
+                middle_agent.table0.Q_vals = table0;
+                left_agent.table2.Q_vals = table2;
+                right_agent.table2.Q_vals = table2;
+                middle_agent.table2.Q_vals = table2;
                 System.out.println("update shod table ha");
                 if (msg.getPerformative() == ACLMessage.INFORM) {
 

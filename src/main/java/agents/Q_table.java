@@ -14,8 +14,18 @@ public class Q_table {
     private int ent_right_mid_x = 200;
     private int ent_right_mid_y = 205;
     private int a = 20;
+    public int move_step=5;
+    private ArrayList<entrance> entrances_left = new ArrayList<entrance>();
+    private ArrayList<entrance> entrances_right = new ArrayList<entrance>();
     public Q_table() {
         this.actions.add("up");this.actions.add("down");this.actions.add("left");this.actions.add("right");
+        for(int i=0;i<10;i++) {
+            entrance ent_t = new entrance(100, 100+i);
+            entrance ent_tt = new entrance(200, 200+i);
+            this.entrances_left.add(ent_t);
+            this.entrances_right.add(ent_tt);
+
+        }
     }
     public void update(String state,String next_state, Double reward, Double diff_angle) {
         if (this.Q_vals.containsKey(state)) {
@@ -30,6 +40,40 @@ public class Q_table {
             val.put("val",new_val);val.put("diff",diff_angle);
             this.Q_vals.put(state, val);
         }
+    }
+    public Boolean isPath(int x, int y) {
+        Boolean is = true;
+        if (x==100) {
+            Boolean find=false;
+            for (int i=0;i<entrances_left.size();i++) {
+                if (y==entrances_left.get(i).getY()){
+                    find=true;
+                    break;
+                }
+            }
+            if (find==true) {
+                is=true;
+            }
+            else {
+                is=false;
+            }
+        }
+        else if (x==200) {
+            Boolean find=false;
+            for (int i=0;i<entrances_right.size();i++) {
+                if (y==entrances_right.get(i).getY()){
+                    find=true;
+                    break;
+                }
+            }
+            if (find==true) {
+                is=true;
+            }
+            else {
+                is=false;
+            }
+        }
+        return is;
     }
 
     public Double MaxQvalueNext(String next_state) {
@@ -47,10 +91,10 @@ public class Q_table {
         }
         return  Qmax;
     }
-    public ArrayList<Integer> getNextPos(int x, int y, int move_step,String action) {
-        ArrayList<Integer> pos = new ArrayList<Integer>();
+    public Boolean updatePosition(int x, int y,String action, int move_step) {
         int x_new = 0;
         int y_new = 0;
+        Boolean hitBlock = false;
         if (action == "up"){
             y_new = y+move_step;
             x_new = x;
@@ -68,25 +112,58 @@ public class Q_table {
             y_new = y;
         }
         if ((x_new >= 0 && x_new<300) && (y_new>=0 && y_new<300)){
-            y = y_new;
-            x = x_new;
+            hitBlock = !isPath(x_new,y_new);
         }
-        pos.add(0, x_new);
-        pos.add(1, y_new);
-        return  pos;
+        else {
+            hitBlock=true;
+        }
+
+        return hitBlock;
     }
+
     public double findAngle(double p0x,double p0y,double p1x,double p1y,double p2x,double p2y) {
         double a = Math.pow(p1x-p0x,2) + Math.pow(p1y-p0y,2),
                 b = Math.pow(p1x-p2x,2) + Math.pow(p1y-p2y,2),
                 c = Math.pow(p2x-p0x,2) + Math.pow(p2y - p0y, 2);
         return 57.2958*Math.acos( (a+b-c) / Math.sqrt(4*a*b) );
     }
+    public ArrayList<Integer> getNextPos(int x, int y,String action, Boolean hitBlock) {
+        ArrayList<Integer> pos = new ArrayList<Integer>();
+        int x_new = 0;
+        int y_new = 0;
+        if (hitBlock) {
+            x_new= x;
+            y_new=y;
+        }
+        else {
+            if (action == "up"){
+                y_new = y+this.move_step;
+                x_new = x;
+            }
+            if (action == "down"){
+                y_new = y-this.move_step;
+                x_new = x;
+            }
+            if (action == "left"){
+                x_new = x-this.move_step;
+                y_new = y;
+            }
+            if (action == "right"){
+                x_new = x+this.move_step;
+                y_new = y;
+            }
+        }
+        pos.add(0, x_new);
+        pos.add(1, y_new);
+        return  pos;
+    }
 
     public Double diffAngleDouble(String action, int x, int y, int x_goal, int y_goal,int ent_middle_x,int ent_middle_y) {
         Double diff = 0.0;
         Double x1 =0.0;
         Double x2=0.0;
-        ArrayList<Integer> nextPos = this.getNextPos(x,y,5,action);
+        Boolean hit= this.updatePosition(x,y,action,this.move_step);
+        ArrayList<Integer> nextPos = this.getNextPos(x,y,action,hit);
         x1 = this.findAngle(x_goal, y_goal, x,y,ent_middle_x, ent_middle_y);
         x2 = this.findAngle(x_goal, y_goal, nextPos.get(0),nextPos.get(1), ent_middle_x, ent_middle_y);
         return x1-x2;
