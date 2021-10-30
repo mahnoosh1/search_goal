@@ -48,7 +48,9 @@ public class right_agent extends Agent {
     public Boolean rand=true;
     PrintWriter writer = null;
     public ArrayList<Integer> avg_step = new ArrayList<Integer>();
-
+    public ArrayList<Double> rewards= new ArrayList<Double>();
+    public Boolean randloop=false;
+    public int randloopcounter=0;
     protected void setup() {
         super.setup();
         try {
@@ -756,7 +758,6 @@ public class right_agent extends Agent {
                     int step_goal = 2000;
                     initial();
                     for(int i=0;i<max_step;i++) {
-                        System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial);
                         getDecider(episode, trial);
                         defineSection();
                         String stateHalf = calcStateHalf();
@@ -775,11 +776,36 @@ public class right_agent extends Agent {
                             }
                             action=validate(action,action1,episode);
                         }
+                        if (randloop && randloopcounter<3) {
+                            action=randomAction();
+                            randloopcounter++;
+                        }
+                        if (randloop && randloopcounter>=3) {
+                            writer.println("out loop");
+                            writer.flush();
+                            randloop=false;
+                        }
+                        System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial+" act "+action);
                         if (inBound(action)) {
                             Boolean hitBlock = updatePosition(action,true);
 
                             String state = calcState(action, hitBlock);
                             Double reward = calcReward(x,y,hitBlock);
+                            //////////////////////////
+                            if (rewards.size()<5) {
+                                rewards.add(reward);
+                            }
+                            else {
+                                boolean allEqual = rewards.isEmpty() || rewards.stream().allMatch(rewards.get(0)::equals);
+                                if (allEqual) {
+                                    randloop=true;
+                                    randloopcounter=0;
+                                    writer.println("in loop");
+                                    writer.flush();
+                                }
+                                rewards=new ArrayList<Double>();
+                            }
+                            //////////////////////////
                             String nextpos= nextPosState(action, hitBlock);
                             Double diff = diffAngleDouble(action,hitBlock);
                             if (section == 0){
