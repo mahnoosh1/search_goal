@@ -13,7 +13,6 @@ public class Q_table {
     private int ent_left_mid_y = 105;
     private int ent_right_mid_x = 200;
     private int ent_right_mid_y = 205;
-    private int a = 20;
     public int move_step=5;
     private ArrayList<entrance> entrances_left = new ArrayList<entrance>();
     private ArrayList<entrance> entrances_right = new ArrayList<entrance>();

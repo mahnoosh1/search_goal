@@ -42,8 +42,8 @@ public class middle_agent extends Agent {
     private int ent_left_mid_y = 105;
     private int ent_right_mid_x = 200;
     private int ent_right_mid_y = 205;
-    private int d=20;
-    private int a=10;
+    private int d=10;
+    private int a=5;
     public Boolean rand=true;
     PrintWriter writer = null;
     public ArrayList<Integer> avg_step = new ArrayList<Integer>();
@@ -718,8 +718,8 @@ public class middle_agent extends Agent {
         Boolean hitBlock1 = updatePosition(action1, false);
         ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
         Double reward1 = calcReward(pos1.get(0), pos1.get(1),hitBlock1);
-        if (reward1>reward && episode>30) {
-            ax=action1;
+        if (reward1>reward) {
+            ax=action1;//action
         }
         else {
             ax=action;
@@ -743,7 +743,6 @@ public class middle_agent extends Agent {
             }
         }
     }
-
     private class Results extends TickerBehaviour {
 
         public Results(Agent a, long timeout)
@@ -762,7 +761,8 @@ public class middle_agent extends Agent {
                         String stateHalf = calcStateHalf();
                         String action = explorExplot(decider, stateHalf);
                         String action1="";
-                        if (rand==true) {
+                        ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>  temp = All_Q_vals(stateHalf);
+                        if (rand==true && temp.size()>0) {
                             if (section == 0){
                                 action1 = table0.getAction(stateHalf,x, y, x_goal, y_goal, 0);
                             }
@@ -776,6 +776,7 @@ public class middle_agent extends Agent {
                         }
                         if (inBound(action)) {
                             Boolean hitBlock = updatePosition(action,true);
+
                             String state = calcState(action, hitBlock);
                             Double reward = calcReward(x,y,hitBlock);
                             String nextpos= nextPosState(action, hitBlock);
@@ -833,6 +834,7 @@ public class middle_agent extends Agent {
                         //////////////////////////
                         if (hit_goal()) {
                             writer.println("Agent "+id+" hit the goal in episode "+episode +" in step "+i);
+                            writer.println("Agent "+id+" size table "+table0.Q_vals.size()+" "+table1.Q_vals.size()+" "+table2.Q_vals.size());
                             writer.flush();
                             step_goal = i;
                             break;
@@ -857,7 +859,9 @@ public class middle_agent extends Agent {
                         e.printStackTrace();
                     }
                     writer1.println(avg_step);
+
                     writer1.println("size: "+avg_step.size());
+                    writer1.println("Agent "+id+" size table "+table0.Q_vals.size()+" "+table1.Q_vals.size()+" "+table2.Q_vals.size());
                     writer1.close();
                     avg_step = new ArrayList<Integer>();
                 }
@@ -870,4 +874,3 @@ public class middle_agent extends Agent {
     }
 
 }
-

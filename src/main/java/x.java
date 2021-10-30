@@ -1,10 +1,10 @@
-import java.util.concurrent.ConcurrentHashMap;
-
 public class x {
+    int move_step=1;
+    int x=-2;
+    int y=0;
+    private int x_goal = 1;
+    private  int y_goal = 1;
     public static void main(String args[]) {
-        ConcurrentHashMap<String, Double> Q_vals = new ConcurrentHashMap<String, Double> ();
-        Q_vals.put("kkk",1.0);
-        Q_vals.replace("kkk", 2.0);
-        System.out.println(Q_vals.get("kkk"));
+      ;
     }
 }
