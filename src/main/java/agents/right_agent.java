@@ -51,6 +51,7 @@ public class right_agent extends Agent {
     public ArrayList<Double> rewards= new ArrayList<Double>();
     public Boolean randloop=false;
     public int randloopcounter=0;
+    public String actionloop="";
     protected void setup() {
         super.setup();
         try {
@@ -746,6 +747,15 @@ public class right_agent extends Agent {
             }
         }
     }
+    public String randomActionExcept(String action) {
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
+        String act=this.actions.get(randomNum);
+        while(act==action) {
+            randomNum = ThreadLocalRandom.current().nextInt(0, 4);
+            act=this.actions.get(randomNum);
+        }
+        return act;
+    }
     private class Results extends TickerBehaviour {
 
         public Results(Agent a, long timeout)
@@ -777,7 +787,12 @@ public class right_agent extends Agent {
                             action=validate(action,action1,episode);
                         }
                         if (randloop && randloopcounter<3) {
-                            action=randomAction();
+                            if (randloopcounter==0) {
+                                action=randomActionExcept(actionloop);
+                            }
+                            else {
+                                action=randomAction();
+                            }
                             randloopcounter++;
                         }
                         if (randloop && randloopcounter>=3) {
@@ -800,6 +815,7 @@ public class right_agent extends Agent {
                                 if (allEqual) {
                                     randloop=true;
                                     randloopcounter=0;
+                                    actionloop=action;
                                     writer.println("in loop");
                                     writer.flush();
                                 }
@@ -901,3 +917,5 @@ public class right_agent extends Agent {
     }
 
 }
+
+

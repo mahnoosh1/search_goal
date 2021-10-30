@@ -77,7 +77,7 @@ public class coordinator extends Agent {
                 table0 = aggregate(left_agent.table0.Q_vals, right_agent.table0.Q_vals);
                 table0= aggregate(table0 ,middle_agent.table0.Q_vals);
                 table2= aggregate(left_agent.table2.Q_vals, right_agent.table2.Q_vals);
-                table2= aggregate(table0 ,middle_agent.table2.Q_vals);
+                table2= aggregate(table2 ,middle_agent.table2.Q_vals);
                 left_agent.table1.Q_vals = table1;
                 right_agent.table1.Q_vals = table1;
                 middle_agent.table1.Q_vals = table1;
