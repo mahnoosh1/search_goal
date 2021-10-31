@@ -1,22 +1,30 @@
 package agents;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 public class Q_table {
-    ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> Q_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
-    private double alpha = 0.3;
-    private double gamma = 0.1;
+    ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> Q0_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
+    ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> Q1_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
+    ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> Q2_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
+    private double alpha = 0.1;
+    private double gamma = 0.8;
     private ArrayList<String> actions = new ArrayList<String>();
-    private int ent_left_mid_x = 100;
-    private int ent_left_mid_y = 105;
-    private int ent_right_mid_x = 200;
-    private int ent_right_mid_y = 205;
+    private int ent_left_mid_xx = 100;
+    private int ent_left_mid_yy = 105;
+    private int ent_right_mid_xx = 200;
+    private int ent_right_mid_yy = 205;
+    private int ent_ou_x=175;
+    private int ent_out_y=301;
     public int move_step=5;
     private ArrayList<entrance> entrances_left = new ArrayList<entrance>();
     private ArrayList<entrance> entrances_right = new ArrayList<entrance>();
     public Q_table() {
+        Q0_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
+        Q1_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
+        Q2_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
         this.actions.add("up");this.actions.add("down");this.actions.add("left");this.actions.add("right");
         for(int i=0;i<10;i++) {
             entrance ent_t = new entrance(100, 100+i);
@@ -26,18 +34,48 @@ public class Q_table {
 
         }
     }
-    public void update(String state,String next_state, Double reward, Double diff_angle) {
-        if (this.Q_vals.containsKey(state)) {
-            Double new_val = this.Q_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state)- this.Q_vals.get(state).get("val"));
-            ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-            val.put("val",new_val);val.put("diff",diff_angle);
-            this.Q_vals.replace(state, val);
+    public void update(String state,String next_state, Double reward, Double diff_angle,int section, int new_section) {
+        if (section==0) {
+            if (this.Q0_vals.containsKey(state)) {
+                Double new_val = this.Q0_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q0_vals.get(state).get("val"));
+                ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
+                val.put("val",new_val);val.put("diff",diff_angle);
+                this.Q0_vals.replace(state, val);
+            }
+            else {
+                Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
+                ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
+                val.put("val",new_val);val.put("diff",diff_angle);
+                this.Q0_vals.put(state, val);
+            }
         }
-        else {
-            Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state));
-            ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-            val.put("val",new_val);val.put("diff",diff_angle);
-            this.Q_vals.put(state, val);
+        if (section==1) {
+            if (this.Q1_vals.containsKey(state)) {
+                Double new_val = this.Q1_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q1_vals.get(state).get("val"));
+                ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
+                val.put("val",new_val+100);val.put("diff",diff_angle);
+                this.Q1_vals.replace(state, val);
+            }
+            else {
+                Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
+                ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
+                val.put("val",new_val+100);val.put("diff",diff_angle);
+                this.Q1_vals.put(state, val);
+            }
+        }
+        if (section==2) {
+            if (this.Q2_vals.containsKey(state)) {
+                Double new_val = this.Q2_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q2_vals.get(state).get("val"));
+                ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
+                val.put("val",new_val);val.put("diff",diff_angle);
+                this.Q2_vals.replace(state, val);
+            }
+            else {
+                Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
+                ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
+                val.put("val",new_val);val.put("diff",diff_angle);
+                this.Q2_vals.put(state, val);
+            }
         }
     }
     public Boolean isPath(int x, int y) {
@@ -74,19 +112,44 @@ public class Q_table {
         }
         return is;
     }
-
-    public Double MaxQvalueNext(String next_state) {
+    public Double MaxQvalueNext(String next_state, int new_section) {
         Double Qmax = -10000.0;
-        for (String k : this.Q_vals.keySet()) {
-            if (k.contains(next_state)){
-                ConcurrentHashMap<String,Double> temp = this.Q_vals.get(k);
-                if (temp.get("val") > Qmax) {
-                    Qmax = temp.get("val") ;
+        Boolean find=false;
+        if (new_section==0) {
+            for (String k : this.Q0_vals.keySet()) {
+                if (k.contains(next_state)){
+                    find=true;
+                    ConcurrentHashMap<String,Double> temp = this.Q0_vals.get(k);
+                    if (temp.get("val") > Qmax) {
+                        Qmax = temp.get("val") ;
+                    }
                 }
             }
-            else {
-                Qmax = 0.0;
+        }
+        if (new_section==1) {
+            for (String k : this.Q1_vals.keySet()) {
+                if (k.contains(next_state)){
+                    find=true;
+                    ConcurrentHashMap<String,Double> temp = this.Q1_vals.get(k);
+                    if (temp.get("val") > Qmax) {
+                        Qmax = temp.get("val") ;
+                    }
+                }
             }
+        }
+        if (new_section==2) {
+            for (String k : this.Q2_vals.keySet()) {
+                if (k.contains(next_state)){
+                    find=true;
+                    ConcurrentHashMap<String,Double> temp = this.Q2_vals.get(k);
+                    if (temp.get("val") > Qmax) {
+                        Qmax = temp.get("val") ;
+                    }
+                }
+            }
+        }
+        if(find==false) {
+            Qmax=0.0;
         }
         return  Qmax;
     }
@@ -156,7 +219,6 @@ public class Q_table {
         pos.add(1, y_new);
         return  pos;
     }
-
     public Double diffAngleDouble(String action, int x, int y, int x_goal, int y_goal,int ent_middle_x,int ent_middle_y) {
         Double diff = 0.0;
         Double x1 =0.0;
@@ -169,38 +231,75 @@ public class Q_table {
     }
 
     public String mapAction(int x, int y, int x_goal, int y_goal, int section, Double diff_proper) {
+
+
         Double diff_close = 1000000000.0;
         String action = "";
-         for (int i=0;i<this.actions.size();i++) {
-             if(section == 0 || section ==1) {
-                 Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_left_mid_x,ent_left_mid_y);
-                 Double distance = Math.abs(diff_proper-diff_temp);
-                 if (distance < diff_close) {
-                     diff_close = distance;
-                     action = this.actions.get(i);
-                 }
-             }
-             if(section == 2) {
-                 Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_right_mid_x,ent_right_mid_y);
-                 Double distance = Math.abs(diff_proper-diff_temp);
-                 if (distance< diff_close) {
-                     diff_close = distance;
-                     action = this.actions.get(i);
-                 }
-             }
+        for (int i=0;i<this.actions.size();i++) {
+            if(section == 0) {
+                Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_left_mid_xx,ent_left_mid_yy);
+                Double distance = Math.abs(diff_proper-diff_temp);
+                if (distance < diff_close) {
+                    diff_close = distance;
+                    action = this.actions.get(i);
+
+                }
+            }
+            if(section == 1) {
+                Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_ou_x,ent_out_y);
+                Double distance = Math.abs(diff_proper-diff_temp);
+                if (distance < diff_close) {
+                    diff_close = distance;
+                    action = this.actions.get(i);
+
+                }
+            }
+            if(section == 2) {
+                Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_right_mid_xx,ent_right_mid_yy);
+                Double distance = Math.abs(diff_proper-diff_temp);
+                if (distance< diff_close) {
+                    diff_close = distance;
+                    action = this.actions.get(i);
+
+                }
+            }
         }
-         return action;
+        return action;
     }
     public String getAction(String temp, int x, int y, int x_goal, int y_goal, int section) {
         Double Qmax = -100000000.0;
         String action = null;
         Double diff_proper = 0.0;
-        for (String k : this.Q_vals.keySet()) {
-            if (k.contains(temp)){
-                ConcurrentHashMap<String,Double> tempx = this.Q_vals.get(k);
-                if (tempx.get("val")> Qmax) {
-                    Qmax = tempx.get("val");
-                    diff_proper = tempx.get("diff");
+        if (section==0) {
+            for (String k : this.Q0_vals.keySet()) {
+                if (k.contains(temp)){
+                    ConcurrentHashMap<String,Double> tempx = this.Q0_vals.get(k);
+                    if (tempx.get("val")> Qmax) {
+                        Qmax = tempx.get("val");
+                        diff_proper = tempx.get("diff");
+                    }
+                }
+            }
+        }
+        if (section==1) {
+            for (String k : this.Q1_vals.keySet()) {
+                if (k.contains(temp)){
+                    ConcurrentHashMap<String,Double> tempx = this.Q1_vals.get(k);
+                    if (tempx.get("val")> Qmax) {
+                        Qmax = tempx.get("val");
+                        diff_proper = tempx.get("diff");
+                    }
+                }
+            }
+        }
+        if (section==2) {
+            for (String k : this.Q2_vals.keySet()) {
+                if (k.contains(temp)){
+                    ConcurrentHashMap<String,Double> tempx = this.Q2_vals.get(k);
+                    if (tempx.get("val")> Qmax) {
+                        Qmax = tempx.get("val");
+                        diff_proper = tempx.get("diff");
+                    }
                 }
             }
         }

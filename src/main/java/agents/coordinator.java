@@ -69,24 +69,24 @@ public class coordinator extends Agent {
         public void action() {
             ACLMessage msg = receive();
             if (msg != null) {
-                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> table1 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
-                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> table0 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
-                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> table2 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
-                table1 = aggregate(left_agent.table1.Q_vals, right_agent.table1.Q_vals);
-                table1= aggregate(table1, middle_agent.table1.Q_vals);
-                table0 = aggregate(left_agent.table0.Q_vals, right_agent.table0.Q_vals);
-                table0= aggregate(table0 ,middle_agent.table0.Q_vals);
-                table2= aggregate(left_agent.table2.Q_vals, right_agent.table2.Q_vals);
-                table2= aggregate(table2 ,middle_agent.table2.Q_vals);
-                left_agent.table1.Q_vals = table1;
-                right_agent.table1.Q_vals = table1;
-                middle_agent.table1.Q_vals = table1;
-                left_agent.table0.Q_vals = table0;
-                right_agent.table0.Q_vals = table0;
-                middle_agent.table0.Q_vals = table0;
-                left_agent.table2.Q_vals = table2;
-                right_agent.table2.Q_vals = table2;
-                middle_agent.table2.Q_vals = table2;
+                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> q1 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
+                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> q0 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
+                ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> q2 = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>();
+                q1 = aggregate(left_agent.table.Q1_vals, right_agent.table.Q1_vals);
+                q1= aggregate(q1, middle_agent.table.Q1_vals);
+                q0 = aggregate(left_agent.table.Q0_vals, right_agent.table.Q0_vals);
+                q0= aggregate(q0 ,middle_agent.table.Q0_vals);
+                q2= aggregate(left_agent.table.Q2_vals, right_agent.table.Q2_vals);
+                q2= aggregate(q2 ,middle_agent.table.Q2_vals);
+                left_agent.table.Q1_vals = q1;
+                right_agent.table.Q1_vals = q1;
+                middle_agent.table.Q1_vals = q1;
+                left_agent.table.Q0_vals = q0;
+                right_agent.table.Q0_vals = q0;
+                middle_agent.table.Q0_vals = q0;
+                left_agent.table.Q2_vals = q2;
+                right_agent.table.Q2_vals = q2;
+                middle_agent.table.Q2_vals = q2;
                 System.out.println("update shod table ha");
                 if (msg.getPerformative() == ACLMessage.INFORM) {
 

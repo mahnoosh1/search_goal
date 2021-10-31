@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 public class x {
     int move_step=1;
     int x=-2;
@@ -7,8 +5,6 @@ public class x {
     private int x_goal = 1;
     private  int y_goal = 1;
     public static void main(String args[]) {
-       if("22"=="22"){
-           System.out.println("jjj");
-       }
+
     }
 }
