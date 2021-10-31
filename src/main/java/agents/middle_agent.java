@@ -40,9 +40,10 @@ public class middle_agent extends Agent {
     private int ent_left_mid_y = 105;
     private int ent_right_mid_x = 200;
     private int ent_right_mid_y = 205;
-    private int ent_ou_x=175;
-    private int ent_out_y=301;
-
+    private int ent_ou_x_right=200;
+    private int ent_out_y_right=301;
+    private int ent_ou_x_left=100;
+    private int ent_out_y_left=301;
     private int d=5;
     private int a=5;
     public Boolean rand=true;
@@ -56,6 +57,7 @@ public class middle_agent extends Agent {
         super.setup();
         try {
             writer = new PrintWriter("Agent"+id+"info"+".txt", "UTF-8");
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -76,7 +78,7 @@ public class middle_agent extends Agent {
     }
     public void initial() {
         this.x = 150;
-        this.y= 20;
+        this.y= 30;
     }
     public String randomAction() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
@@ -233,10 +235,18 @@ public class middle_agent extends Agent {
             s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff;
         }
         if (this.section == 1) {
-            Double x1 = this.dist(this.x, this.y, this.ent_ou_x, this.ent_out_y);
-            Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
-            Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_ou_x, this.ent_out_y);
-            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff;
+            if (this.x>=150) {
+                Double x1 = this.dist(this.x, this.y, this.ent_ou_x_right, this.ent_out_y_right);
+                Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
+                Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_ou_x_right, this.ent_out_y_right);
+                s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff;
+            }
+            else {
+                Double x1 = this.dist(this.x, this.y, this.ent_ou_x_left, this.ent_out_y_left);
+                Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
+                Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_ou_x_left, this.ent_out_y_left);
+                s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff;
+            }
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -255,10 +265,18 @@ public class middle_agent extends Agent {
             s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
         }
         if (this.section == 1) {
-            Double x1 = this.dist(this.x, this.y, this.ent_ou_x, this.ent_out_y);
-            Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
-            Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_ou_x, this.ent_out_y);
-            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            if (this.x>=150) {
+                Double x1 = this.dist(this.x, this.y, this.ent_ou_x_right, this.ent_out_y_right);
+                Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
+                Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_ou_x_right, this.ent_out_y_right);
+                s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            }
+            else {
+                Double x1 = this.dist(this.x, this.y, this.ent_ou_x_left, this.ent_out_y_left);
+                Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
+                Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_ou_x_left, this.ent_out_y_left);
+                s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            }
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -279,10 +297,18 @@ public class middle_agent extends Agent {
             nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
         }
         if (nextpos.get(0)>=100 && nextpos.get(0)<=200) {
-            Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_ou_x,ent_out_y);
-            Double x2 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
-            Double x3= findAngle(x_goal,y_goal, nextpos.get(0), nextpos.get(1), ent_ou_x,ent_out_y);
-            nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            if (nextpos.get(0)>=150) {
+                Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_ou_x_right,ent_out_y_right);
+                Double x2 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
+                Double x3= findAngle(x_goal,y_goal, nextpos.get(0), nextpos.get(1), ent_ou_x_right,ent_out_y_right);
+                nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            }
+            else {
+                Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_ou_x_left,ent_out_y_left);
+                Double x2 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
+                Double x3= findAngle(x_goal,y_goal, nextpos.get(0), nextpos.get(1), ent_ou_x_left,ent_out_y_left);
+                nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            }
         }
         if (nextpos.get(0)>200) {
             Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_right_mid_x,ent_right_mid_y);
@@ -333,8 +359,20 @@ public class middle_agent extends Agent {
             x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
         }
         if (this.section == 1) {
-            x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_ou_x, this.ent_out_y);
-            x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_ou_x, this.ent_out_y);
+            if (this.x>=150) {
+                x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_ou_x_right, this.ent_out_y_right);
+            }
+            if (this.x<150) {
+                x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_ou_x_left, this.ent_out_y_left);
+            }
+            if (nextPos.get(0)>=150){
+                x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_ou_x_right, this.ent_out_y_right);
+
+            }
+            if (nextPos.get(0)<150) {
+                x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_ou_x_left, this.ent_out_y_left);
+
+            }
         }
         if (this.section == 2) {
             x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -351,8 +389,20 @@ public class middle_agent extends Agent {
             x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
         }
         if (this.section == 1) {
-            x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_ou_x, this.ent_out_y);
-            x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_ou_x, this.ent_out_y);
+            if (this.x>=150) {
+                x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_ou_x_right, this.ent_out_y_right);
+            }
+            if (this.x<150) {
+                x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_ou_x_left, this.ent_out_y_left);
+            }
+            if (nextPos.get(0)>=150){
+                x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_ou_x_right, this.ent_out_y_right);
+
+            }
+            if (nextPos.get(0)<150) {
+                x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_ou_x_left, this.ent_out_y_left);
+
+            }
         }
         if (this.section == 2) {
             x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -790,6 +840,7 @@ public class middle_agent extends Agent {
                             randloop=false;
                         }
                         System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial+"x: "+x+"y "+y+" act "+action);
+
                         if (inBound(action)) {
                             Boolean hitBlock = updatePosition(action,true);
                             String state = calcState(action, hitBlock);
@@ -923,5 +974,3 @@ public class middle_agent extends Agent {
     }
 
 }
-
-

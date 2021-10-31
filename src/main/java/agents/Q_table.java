@@ -16,8 +16,10 @@ public class Q_table {
     private int ent_left_mid_yy = 105;
     private int ent_right_mid_xx = 200;
     private int ent_right_mid_yy = 205;
-    private int ent_ou_x=175;
-    private int ent_out_y=301;
+    private int ent_ou_x_right=200;
+    private int ent_out_y_right=301;
+    private int ent_ou_x_left=100;
+    private int ent_out_y_left=301;
     public int move_step=5;
     private ArrayList<entrance> entrances_left = new ArrayList<entrance>();
     private ArrayList<entrance> entrances_right = new ArrayList<entrance>();
@@ -229,10 +231,30 @@ public class Q_table {
         x2 = this.findAngle(x_goal, y_goal, nextPos.get(0),nextPos.get(1), ent_middle_x, ent_middle_y);
         return x1-x2;
     }
+    public Double diffAngleDoubleModified(String action, int x, int y, int x_goal, int y_goal) {
+        Double diff = 0.0;
+        Double x1 =0.0;
+        Double x2=0.0;
+        Boolean hit= this.updatePosition(x,y,action,this.move_step);
+        ArrayList<Integer> nextPos = this.getNextPos(x,y,action,hit);
+        if (x>=150) {
+            x1 = this.findAngle(x_goal, y_goal, x,y,ent_ou_x_right, ent_out_y_right);
+        }
+        if (x<150) {
+            x1 = this.findAngle(x_goal, y_goal, x,y,ent_ou_x_left, ent_out_y_left);
+        }
+        if(nextPos.get(0)>=150) {
+            x2 = this.findAngle(x_goal, y_goal, nextPos.get(0),nextPos.get(1), ent_ou_x_right, ent_out_y_right);
+
+        }
+        if (nextPos.get(0)<150){
+            x2 = this.findAngle(x_goal, y_goal, nextPos.get(0),nextPos.get(1), ent_ou_x_left, ent_out_y_left);
+
+        }
+        return x1-x2;
+    }
 
     public String mapAction(int x, int y, int x_goal, int y_goal, int section, Double diff_proper) {
-
-
         Double diff_close = 1000000000.0;
         String action = "";
         for (int i=0;i<this.actions.size();i++) {
@@ -246,7 +268,7 @@ public class Q_table {
                 }
             }
             if(section == 1) {
-                Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_ou_x,ent_out_y);
+                Double diff_temp = this.diffAngleDoubleModified(this.actions.get(i),x,y,x_goal,y_goal);
                 Double distance = Math.abs(diff_proper-diff_temp);
                 if (distance < diff_close) {
                     diff_close = distance;
