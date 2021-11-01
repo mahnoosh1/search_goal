@@ -257,13 +257,14 @@ public class Q_table {
         return this.actions.get(randomNum);
     }
 
-    public String mapAction(int x, int y, int x_goal, int y_goal, int section, Double diff_proper) {
+    public String mapAction(int x, int y, int x_goal, int y_goal, int section, Double diff_proper,String temp) {
         Double diff_close = 1000000000.0;
         String action = "";
         for (int i=0;i<this.actions.size();i++) {
             if(section == 0) {
                 Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_left_mid_xx,ent_left_mid_yy);
                 Double distance = Math.abs(diff_proper-diff_temp);
+
                 if (diff_temp == diff_proper) {
                     diff_close = distance;
                     action = this.actions.get(i);
@@ -310,6 +311,7 @@ public class Q_table {
                 }
             }
         }
+
         return action;
     }
     public String getAction(String temp, int x, int y, int x_goal, int y_goal, int section) {
@@ -331,6 +333,7 @@ public class Q_table {
             for (String k : this.Q1_vals.keySet()) {
                 if (k.contains(temp)){
                     ConcurrentHashMap<String,Double> tempx = this.Q1_vals.get(k);
+
                     if (tempx.get("val")> Qmax ) {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
@@ -350,7 +353,7 @@ public class Q_table {
             }
         }
         if (diff_proper!=-100.0 && diff_proper!=0.0) {
-            action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper);
+            action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp);
             return action;
         }
         else {

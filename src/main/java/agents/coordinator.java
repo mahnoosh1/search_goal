@@ -1,5 +1,6 @@
 package agents;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -20,7 +21,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 
-public class coordinator extends Agent {
+public class coordinator extends Agent implements Serializable {
 
     private  int id =4;
     private  int n =0;

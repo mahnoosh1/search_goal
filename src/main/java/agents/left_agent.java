@@ -202,25 +202,25 @@ public class left_agent extends Agent {
                 c = Math.pow(p2x-p0x,2) + Math.pow(p2y - p0y, 2);
         return 57.2958*Math.acos( (a+b-c) / Math.sqrt(4*a*b) );
     }
-    public Double calcReward(int x, int y,Boolean hitBlock) {
+    public Double calcReward(int x, int y,int x_prev, int y_prev,Boolean hitBlock) {
         Double r = 0.0;
         if (hitBlock) {
             r=-100.0;
         } else {
             if(this.section == 0){
-                r = this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y);
+                r = 50*(this.dist(x_prev, y_prev, this.ent_left_mid_x, this.ent_left_mid_y)-this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y));
             }
             if(this.section == 1){
-                r = this.dist(x, y, this.x_goal, this.y_goal);
+                r = 50*(this.dist(x_prev, y_prev, this.x_goal, this.y_goal)- this.dist(x, y, this.x_goal, this.y_goal));;
             }
             if(this.section == 2){
-                r = this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y);
+                r = 50*(this.dist(x_prev, y_prev, this.ent_right_mid_x, this.ent_right_mid_y)-this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y));
             }
-            if (r==0) {
+            if (hit_goal(x,y)) {
                 r= 100.0;
             }
             else
-                r=1/r;
+                r=r;
         }
         return r;
     }
@@ -716,7 +716,14 @@ public class left_agent extends Agent {
     }
     private Boolean hit_goal() {
         Boolean hit = false;
-        if (this.x == this.x_goal && this.y == this.y_goal) {
+        if (this.x == this.x_goal && this.y == this.y_goal || this.x == this.x_goal && this.y == this.y_goal-1||this.x == this.x_goal && this.y == this.y_goal+1||this.x == this.x_goal-1 && this.y == this.y_goal||this.x == this.x_goal+1 && this.y == this.y_goal) {
+            hit = true;
+        }
+        return hit;
+    }
+    private Boolean hit_goal(int x,int y) {
+        Boolean hit = false;
+        if (x == this.x_goal && y == this.y_goal || x == this.x_goal && y == this.y_goal-1||x == this.x_goal && y == this.y_goal+1||x == this.x_goal-1 && y == this.y_goal||x == this.x_goal+1 && y == this.y_goal) {
             hit = true;
         }
         return hit;
@@ -725,12 +732,12 @@ public class left_agent extends Agent {
         String ax="";
         Boolean hitBlock = updatePosition(action, false);
         ArrayList<Integer> pos = getNextPos(action,hitBlock);
-        Double reward = calcReward(pos.get(0), pos.get(1),hitBlock);
+        Double reward = calcReward(pos.get(0), pos.get(1),this.x,this.y,hitBlock);
         //////////////////
         Boolean hitBlock1 = updatePosition(action1, false);
         ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
-        Double reward1 = calcReward(pos1.get(0), pos1.get(1),hitBlock1);
-        if (reward1>reward && episode>=30) {
+        Double reward1 = calcReward(pos1.get(0), pos1.get(1),this.x,this.y,hitBlock1);
+        if (reward1>reward) {
             ax=action1;//action
         }
         else {
@@ -828,7 +835,8 @@ public class left_agent extends Agent {
                                 reward=-100.0;
                             }
                             else {
-                                reward = calcReward(x,y,hitBlock);
+                                ArrayList<Integer> pos = getNextPos(action,hitBlock);
+                                reward = calcReward(pos.get(0),pos.get(1),x,y,hitBlock);
 
                             }
                             //////////////////////////
@@ -846,8 +854,6 @@ public class left_agent extends Agent {
                                 if (allEqual) {
                                     randloop=true;
                                     randloopcounter=0;
-                                    System.out.println(actionsList);
-                                    System.out.println(actionloop);
 
                                 }
                                 actionloop=new ArrayList<String>();
@@ -865,7 +871,6 @@ public class left_agent extends Agent {
                             if (section==2) {
                                 table.update(state,nextpos,reward,diff,section,section_new);
                             }
-
                         } else {
                             String state = calcState(action,true);
                             Double reward = -100.0;
