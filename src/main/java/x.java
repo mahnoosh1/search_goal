@@ -1,3 +1,5 @@
+import agents.test;
+
 public class x {
     int move_step=1;
     int x=-2;
@@ -5,6 +7,7 @@ public class x {
     private int x_goal = 1;
     private  int y_goal = 1;
     public static void main(String args[]) {
-
+       test t = new test();
+       t.onTick();
     }
 }

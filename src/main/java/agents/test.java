@@ -15,7 +15,7 @@ import jade.lang.acl.ACLMessage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class left_agent extends Agent {
+public class test {
 
     private  int id =0;
     private int decider = 0;
@@ -48,12 +48,11 @@ public class left_agent extends Agent {
     public Boolean rand=true;
     PrintWriter writer = null;
     public ArrayList<Integer> avg_step = new ArrayList<Integer>();
-    public ArrayList<String> actionsList= new ArrayList<String>();
+    public ArrayList<Double> rewards= new ArrayList<Double>();
     public Boolean randloop=false;
     public int randloopcounter=0;
-    public ArrayList<String> actionloop=new ArrayList<String>();
-    protected void setup() {
-        super.setup();
+    public String actionloop="";
+    public test() {
         try {
             writer = new PrintWriter("Agent"+id+"info"+".txt", "UTF-8");
 
@@ -71,13 +70,11 @@ public class left_agent extends Agent {
             this.entrances_right.add(ent_tt);
 
         }
-        addBehaviour(new left_agent.Receiver());
-        addBehaviour(new left_agent.Results(this,5000));
 
     }
     public void initial() {
-        this.x = 50;
-        this.y= 30;
+        this.x = 170;
+        this.y= 105;
     }
     public String randomAction() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
@@ -226,34 +223,32 @@ public class left_agent extends Agent {
     }
     public String calcState(String action, Boolean hitBlock) {
         String s = "";
-        Double diff = this.diffAngleDouble(action, hitBlock);
-        String string_diff = String.format("%.2f", diff);
-        Double diff_convert= Double.parseDouble(string_diff);
+        Integer diff = this.diffAngleState(action, hitBlock);
         if (this.section == 0) {
             Double x1 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
             Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
             Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff_convert;
+            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff;
         }
         if (this.section == 1) {
             if (this.x>=150) {
                 Double x1 = this.dist(this.x, this.y, this.ent_ou_x_right, this.ent_out_y_right);
                 Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
                 Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_ou_x_right, this.ent_out_y_right);
-                s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff_convert;
+                s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff;
             }
             else {
                 Double x1 = this.dist(this.x, this.y, this.ent_ou_x_left, this.ent_out_y_left);
                 Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
                 Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_ou_x_left, this.ent_out_y_left);
-                s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff_convert;
+                s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff;
             }
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
             Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
             Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
-            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff_convert;
+            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff;
         }
         return s;
     }
@@ -351,6 +346,38 @@ public class left_agent extends Agent {
         return  pos;
     }
     public Double diffAngleDouble(String action, Boolean hitBlock) {
+        Double diff = 0.0;
+        Double x1 =0.0;
+        Double x2=0.0;
+        ArrayList<Integer> nextPos = this.getNextPos(action, hitBlock);
+        System.out.println(hitBlock);
+        if (this.section == 0) {
+            x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_left_mid_x, this.ent_left_mid_y);
+            x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
+        }
+        if (this.section == 1) {
+            if (this.x>=150) {
+                x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_ou_x_right, this.ent_out_y_right);
+            }
+            if (this.x<150) {
+                x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_ou_x_left, this.ent_out_y_left);
+            }
+            if (nextPos.get(0)>=150){
+                x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_ou_x_right, this.ent_out_y_right);
+
+            }
+            if (nextPos.get(0)<150) {
+                x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_ou_x_left, this.ent_out_y_left);
+
+            }
+        }
+        if (this.section == 2) {
+            x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_right_mid_x, this.ent_right_mid_y);
+            x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_right_mid_x, this.ent_right_mid_y);
+        }
+        return x1-x2;
+    }
+    public Integer diffAngleState(String action, Boolean hitBlock) {
         Double x1 =0.0;
         Double x2=0.0;
         ArrayList<Integer> nextPos = this.getNextPos(action, hitBlock);
@@ -378,9 +405,10 @@ public class left_agent extends Agent {
             x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_right_mid_x, this.ent_right_mid_y);
             x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_right_mid_x, this.ent_right_mid_y);
         }
-        return x1-x2;
+        return Math.toIntExact(Math.round((x1 - x2) / this.a));
     }
-    public int getDecider(int episode) {
+
+    public int getDecider(int episode, int trial) {
         if (episode >=0 && episode <=30) {
             decider = 0;
         }
@@ -738,218 +766,154 @@ public class left_agent extends Agent {
         }
         return ax;
     }
-    private class Receiver extends CyclicBehaviour {
 
-        public void action() {
-//           // System.out.println("reciever "+id);
-            ACLMessage msg = receive();
-            if (msg != null) {
-//                //System.out.println("mesage daryaft shod az "+id);
-                //Receive coordinates from each pharmacy
-                if (msg.getPerformative() == ACLMessage.INFORM) {
-
-
-                }
-
-
-            }
-        }
-    }
-    public String randomActionExcept(ArrayList<String> action) {
-        Boolean ok=false;
-        String act="";
-        while(!ok) {
-            int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
+    public String randomActionExcept(String action) {
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
+        String act=this.actions.get(randomNum);
+        while(act==action) {
+            randomNum = ThreadLocalRandom.current().nextInt(0, 4);
             act=this.actions.get(randomNum);
-            Boolean find=false;
-            for(int i=0;i<action.size();i++) {
-                if (action.get(i)==act) {
-                    find=true;
-                    break;
-                }
-            }
-            ok=!find;
         }
         return act;
     }
-    private class Results extends TickerBehaviour {
-        public Results(Agent a, long timeout)
-        {
-            super(a, timeout);
-        }
-        protected void onTick() {
-            if (trial<max_trial) {
-                if (episode<max_episodes) {
-                    int step_goal = 2000;
-                    initial();
-                    for(int i=0;i<max_step;i++) {
-                        getDecider(episode);
-                        section=defineSection();
-                        String stateHalf = calcStateHalf();
-                        String action = explorExplot(decider, stateHalf);
-                        String action1="";
-                        ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>  temp = All_Q_vals(stateHalf);
-                        if (rand==true && temp.size()>0) {
-                            if (section == 0){
-                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 0);
-                            }
-                            if (section==1){
-                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 1);
-                            }
-                            if (section==2){
-                                action1 = table.getAction(stateHalf,x, y, x_goal,  y_goal, 2);
-                            }
-                            action=validate(action,action1,episode);
+    public void onTick() {
+        if (trial<1) {
+            if (episode<1) {
+                int step_goal = 2000;
+                initial();
+                for(int i=0;i<1;i++) {
+                    getDecider(episode, trial);
+                    section=defineSection();
+                    String stateHalf = calcStateHalf();
+                    String action="left";
+                    String action1="";
+                    for(int j=0;j<this.actions.size();j++){
+                        Double d= this.diffAngleDouble(actions.get(j),false);
+                        String s = String.format("%.2f", d);
+                        System.out.println(actions.get(j)+"   "+s);
+                    }
+                    this.x=130;
+                    for(int j=0;j<this.actions.size();j++){
+                        Double d= this.diffAngleDouble(actions.get(j),false);
+                        String s = String.format("%.2f", d);
+                        System.out.println(actions.get(j)+"   "+s);
+                    }
+                    ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>  temp = All_Q_vals(stateHalf);
+                    if (rand==true && temp.size()>0) {
+                        if (section == 0){
+                            action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 0);
                         }
-                        if (randloop && randloopcounter<3) {
+                        if (section==1){
+                            action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 1);
+                        }
+                        if (section==2){
+                            action1 = table.getAction(stateHalf,x, y, x_goal,  y_goal, 2);
+                        }
+                        action=validate(action,action1,episode);
+                        System.out.println(action1+"  action11111111111");
+                    }
+                    if (randloop && randloopcounter<3) {
+                        if (randloopcounter==0) {
                             action=randomActionExcept(actionloop);
-                            randloopcounter++;
                         }
-                        if (randloop && randloopcounter>=3) {
-
-                            randloop=false;
+                        else {
+                            action=randomAction();
                         }
-                        System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial+"x: "+x+"y "+y+" act "+action);
-                        if (inBound(action)) {
-                            Boolean hitBlock = updatePosition(action,false);
-                            String state = calcState(action, hitBlock);
-                            int section_new=defineSection();
-                            Double reward=0.0;
-                            if (section==0 && section_new==1) {
-                                reward=50.0;
-                            }
-                            else if (section==2 && section_new==1) {
-                                reward=50.0;
-                            }
-                            else if (section==1 && section_new==0) {
-                                reward=-100.0;
-                            }
-                            else if (section==1 && section_new==2) {
-                                reward=-100.0;
-                            }
-                            else {
-                                reward = calcReward(x,y,hitBlock);
+                        randloopcounter++;
+                    }
+                    if (randloop && randloopcounter>=3) {
+                        writer.println("out loop");
+                        writer.flush();
+                        randloop=false;
+                    }
+                    System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial+"x: "+x+"y "+y+" act "+action);
 
-                            }
-                            //////////////////////////
-                            if (actionsList.size()<4) {
-                                actionsList.add(action);
-                                actionloop.add(action);
-                            }
-                            else {
-                                boolean allEqual = false;
-                                if (actionsList.get(0)!=actionsList.get(1)) {
-                                    if (actionsList.get(0)==actionsList.get(2) && actionsList.get(1)==actionsList.get(3)) {
-                                        allEqual=true;
-                                    }
-                                }
-                                if (allEqual) {
-                                    randloop=true;
-                                    randloopcounter=0;
-                                    System.out.println(actionsList);
-                                    System.out.println(actionloop);
-
-                                }
-                                actionloop=new ArrayList<String>();
-                                actionsList=new ArrayList<String>();
-                            }
-                            //////////////////////////
-                            String nextpos= nextPosState(action, hitBlock);
-                            Double diff = diffAngleDouble(action,hitBlock);
-                            if (section == 0){
-                                table.update(state,nextpos,reward,diff,section,section_new);
-                            }
-                            if (section==1) {
-                                table.update(state,nextpos,reward,diff,section,section_new);
-                            }
-                            if (section==2) {
-                                table.update(state,nextpos,reward,diff,section,section_new);
-                            }
-
-                        } else {
-                            String state = calcState(action,true);
-                            Double reward = -100.0;
-                            String nextpos= calcState(action, true);
-                            Double diff = 0.0;
-                            if (section == 0){
-                                table.update(state,nextpos,reward, (diff),section,section);
-                            }
-                            if (section==1) {
-                                table.update(state,nextpos,reward, (diff),section,section);
-                            }
-                            if (section == 2){
-                                table.update(state,nextpos,reward, (diff),section,section);
-                            }
+                    if (inBound(action)) {
+                        Boolean hitBlock = updatePosition(action,false);
+                        String state = calcState(action, hitBlock);
+                        int section_new=defineSection();
+                        Double reward=0.0;
+                        if (section==0 && section_new==1) {
+                            reward=50.0;
                         }
-                        ///////////////////////////
-                        try {
-                            DFAgentDescription dfd = new DFAgentDescription();
-                            ServiceDescription sd = new ServiceDescription();
-                            sd.setType("coordinator");
-                            dfd.addServices(sd);
-                            DFAgentDescription[] result = DFService.search(this.myAgent, dfd);
-                            ACLMessage mensagem = new ACLMessage(ACLMessage.CFP);
-                            if(section == 0) {
-                                mensagem.setContentObject( table.Q0_vals);
-                            }
-                            if (section==1) {
-                                mensagem.setContentObject(table.Q1_vals);
-                            }
-                            if(section == 2) {
-                                mensagem.setContentObject( table.Q2_vals);
-                            }
-                            AID receiver = new AID();
-                            receiver.setLocalName("coordinator");
-                            mensagem.addReceiver(receiver);
-                            myAgent.send(mensagem);
-                            Thread.sleep(50);
-                        } catch (FIPAException | InterruptedException | IOException e) {
-                            e.printStackTrace();
+                        else if (section==2 && section_new==1) {
+                            reward=50.0;
+                        }
+                        else if (section==1 && section_new==0) {
+                            reward=-100.0;
+                        }
+                        else if (section==1 && section_new==2) {
+                            reward=-100.0;
+                        }
+                        else {
+                            reward = calcReward(x,y,hitBlock);
+
                         }
                         //////////////////////////
-                        if (hit_goal()) {
-                            writer.println("Agent "+id+" hit the goal in episode "+episode +" in step "+i);
-                            writer.println("Agent "+id+" size table "+table.Q0_vals.size()+" "+table.Q1_vals.size()+" "+table.Q2_vals.size());
-                            writer.flush();
-                            step_goal = i;
-                            initial();
-                            break;
+                        if (rewards.size()<5) {
+                            rewards.add(reward);
                         }
-                        updatePosition(action,true);
-                    }
-                    episode++;
-                    avg_step.add(step_goal);
-                }
-                if (episode == max_episodes) {
-                    trial++;
-                    writer.println("Agent "+id +"  trial "+ trial+" shoro shod");
-                    writer.flush();
-                    episode = 0;
-                    step =0;
-                    initial();
-                    PrintWriter writer1 = null;
-                    try {
-                        writer1 = new PrintWriter("Agent"+id+"trial"+(trial-1)+".txt", "UTF-8");
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                    writer1.println(avg_step);
+                        else {
+                            boolean allEqual = rewards.isEmpty() || rewards.stream().allMatch(rewards.get(0)::equals);
+                            if (allEqual) {
+                                randloop=true;
+                                randloopcounter=0;
+                                actionloop=action;
+                                writer.println("in loop");
+                                writer.flush();
+                            }
+                            rewards=new ArrayList<Double>();
+                        }
+                        //////////////////////////
+                        String nextpos= nextPosState(action, hitBlock);
+                        Double diff = diffAngleDouble(action,hitBlock);
+                        if (section == 0){
+                            table.update(state,nextpos,reward,diff,section,section_new);
+                        }
+                        if (section==1) {
+                            table.update(state,nextpos,reward,diff,section,section_new);
+                        }
+                        if (section==2) {
+                            table.update(state,nextpos,reward,diff,section,section_new);
+                        }
 
-                    writer1.println("size: "+avg_step.size());
-                    writer1.println("Agent "+id+" size table "+table.Q0_vals.size()+" "+table.Q1_vals.size()+" "+table.Q2_vals.size());
-                    writer1.close();
-                    avg_step = new ArrayList<Integer>();
-                    table = new Q_table();
-                }
+                    } else {
+                        String state = calcState(action,true);
+                        Double reward = -100.0;
+                        String nextpos= calcState(action, true);
+                        Double diff = 0.0;
+                        if (section == 0){
+                            table.update(state,nextpos,reward, (diff),section,section);
+                        }
+                        if (section==1) {
+                            table.update(state,nextpos,reward, (diff),section,section);
+                        }
+                        if (section == 2){
+                            table.update(state,nextpos,reward, (diff),section,section);
+                        }
+                    }
 
-            }
-            if (trial==max_trial) {
-                writer.close();
+                    if (hit_goal()) {
+                        writer.println("Agent "+id+" hit the goal in episode "+episode +" in step "+i);
+                        writer.println("Agent "+id+" size table "+table.Q0_vals.size()+" "+table.Q1_vals.size()+" "+table.Q2_vals.size());
+                        writer.flush();
+                        step_goal = i;
+                        initial();
+                        break;
+                    }
+                    updatePosition(action,true);
+                    System.out.println("x: "+x+" y:"+y);
+                }
+                System.out.println(table.Q2_vals);
+                episode++;
+                avg_step.add(step_goal);
             }
         }
+        if (trial==max_trial) {
+            writer.close();
+        }
     }
+
 
 }
 

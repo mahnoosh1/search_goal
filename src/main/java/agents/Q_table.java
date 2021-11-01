@@ -3,6 +3,7 @@ package agents;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public class Q_table {
@@ -222,7 +223,6 @@ public class Q_table {
         return  pos;
     }
     public Double diffAngleDouble(String action, int x, int y, int x_goal, int y_goal,int ent_middle_x,int ent_middle_y) {
-        Double diff = 0.0;
         Double x1 =0.0;
         Double x2=0.0;
         Boolean hit= this.updatePosition(x,y,action,this.move_step);
@@ -232,7 +232,6 @@ public class Q_table {
         return x1-x2;
     }
     public Double diffAngleDoubleModified(String action, int x, int y, int x_goal, int y_goal) {
-        Double diff = 0.0;
         Double x1 =0.0;
         Double x2=0.0;
         Boolean hit= this.updatePosition(x,y,action,this.move_step);
@@ -253,6 +252,10 @@ public class Q_table {
         }
         return x1-x2;
     }
+    public String randomAction() {
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
+        return this.actions.get(randomNum);
+    }
 
     public String mapAction(int x, int y, int x_goal, int y_goal, int section, Double diff_proper) {
         Double diff_close = 1000000000.0;
@@ -261,28 +264,49 @@ public class Q_table {
             if(section == 0) {
                 Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_left_mid_xx,ent_left_mid_yy);
                 Double distance = Math.abs(diff_proper-diff_temp);
-                if (distance < diff_close) {
+                if (diff_temp == diff_proper) {
                     diff_close = distance;
                     action = this.actions.get(i);
+                    break;
+                }
+                else {
+                    if (distance < diff_close) {
+                        diff_close = distance;
+                        action = this.actions.get(i);
 
+                    }
                 }
             }
             if(section == 1) {
                 Double diff_temp = this.diffAngleDoubleModified(this.actions.get(i),x,y,x_goal,y_goal);
                 Double distance = Math.abs(diff_proper-diff_temp);
-                if (distance < diff_close) {
+                if (diff_temp == diff_proper) {
                     diff_close = distance;
                     action = this.actions.get(i);
+                    break;
+                }
+                else {
+                    if (distance < diff_close) {
+                        diff_close = distance;
+                        action = this.actions.get(i);
 
+                    }
                 }
             }
             if(section == 2) {
                 Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_right_mid_xx,ent_right_mid_yy);
                 Double distance = Math.abs(diff_proper-diff_temp);
-                if (distance< diff_close) {
+                if (diff_temp == diff_proper) {
                     diff_close = distance;
                     action = this.actions.get(i);
+                    break;
+                }
+                else {
+                    if (distance < diff_close) {
+                        diff_close = distance;
+                        action = this.actions.get(i);
 
+                    }
                 }
             }
         }
@@ -291,7 +315,7 @@ public class Q_table {
     public String getAction(String temp, int x, int y, int x_goal, int y_goal, int section) {
         Double Qmax = -100000000.0;
         String action = null;
-        Double diff_proper = 0.0;
+        Double diff_proper = -100.0;
         if (section==0) {
             for (String k : this.Q0_vals.keySet()) {
                 if (k.contains(temp)){
@@ -307,7 +331,7 @@ public class Q_table {
             for (String k : this.Q1_vals.keySet()) {
                 if (k.contains(temp)){
                     ConcurrentHashMap<String,Double> tempx = this.Q1_vals.get(k);
-                    if (tempx.get("val")> Qmax) {
+                    if (tempx.get("val")> Qmax ) {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
                     }
@@ -325,7 +349,12 @@ public class Q_table {
                 }
             }
         }
-        action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper);
-        return action;
+        if (diff_proper!=-100.0 && diff_proper!=0.0) {
+            action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper);
+            return action;
+        }
+        else {
+            return randomAction();
+        }
     }
 }
