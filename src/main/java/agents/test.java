@@ -73,8 +73,8 @@ public class test {
 
     }
     public void initial() {
-        this.x = 170;
-        this.y= 105;
+        this.x = 205;
+        this.y= 205;
     }
     public String randomAction() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
@@ -766,6 +766,20 @@ public class test {
         }
         return ax;
     }
+    public int defineSection(String action, Boolean hit) {
+        ArrayList<Integer> pos=getNextPos(action, hit);
+        int sec=0;
+        if (pos.get(0)<100) {
+            sec= 0;
+        }
+        if (pos.get(0)>=100 && pos.get(0)<=200) {
+            sec= 1;
+        }
+        if (pos.get(0)>200) {
+            sec= 2;
+        }
+        return sec;
+    }
 
     public String randomActionExcept(String action) {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
@@ -781,23 +795,14 @@ public class test {
             if (episode<1) {
                 int step_goal = 2000;
                 initial();
-                for(int i=0;i<1;i++) {
+                for(int i=0;i<2;i++) {
+                    System.out.println(table.Q2_vals);
                     getDecider(episode, trial);
                     section=defineSection();
                     String stateHalf = calcStateHalf();
                     String action="left";
                     String action1="";
-                    for(int j=0;j<this.actions.size();j++){
-                        Double d= this.diffAngleDouble(actions.get(j),false);
-                        String s = String.format("%.2f", d);
-                        System.out.println(actions.get(j)+"   "+s);
-                    }
-                    this.x=130;
-                    for(int j=0;j<this.actions.size();j++){
-                        Double d= this.diffAngleDouble(actions.get(j),false);
-                        String s = String.format("%.2f", d);
-                        System.out.println(actions.get(j)+"   "+s);
-                    }
+
                     ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>  temp = All_Q_vals(stateHalf);
                     if (rand==true && temp.size()>0) {
                         if (section == 0){
@@ -810,7 +815,7 @@ public class test {
                             action1 = table.getAction(stateHalf,x, y, x_goal,  y_goal, 2);
                         }
                         action=validate(action,action1,episode);
-                        System.out.println(action1+"  action11111111111");
+
                     }
                     if (randloop && randloopcounter<3) {
                         if (randloopcounter==0) {
@@ -826,12 +831,11 @@ public class test {
                         writer.flush();
                         randloop=false;
                     }
-                    System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial+"x: "+x+"y "+y+" act "+action);
 
                     if (inBound(action)) {
                         Boolean hitBlock = updatePosition(action,false);
                         String state = calcState(action, hitBlock);
-                        int section_new=defineSection();
+                        int section_new=defineSection(action,hitBlock);
                         Double reward=0.0;
                         if (section==0 && section_new==1) {
                             reward=50.0;
@@ -867,6 +871,7 @@ public class test {
                         //////////////////////////
                         String nextpos= nextPosState(action, hitBlock);
                         Double diff = diffAngleDouble(action,hitBlock);
+                        System.out.println(section+"   "+section_new);
                         if (section == 0){
                             table.update(state,nextpos,reward,diff,section,section_new);
                         }
@@ -876,7 +881,9 @@ public class test {
                         if (section==2) {
                             table.update(state,nextpos,reward,diff,section,section_new);
                         }
+                        initial();
 
+                        table.getAction(stateHalf,x, y, x_goal,  y_goal, 2);
                     } else {
                         String state = calcState(action,true);
                         Double reward = -100.0;

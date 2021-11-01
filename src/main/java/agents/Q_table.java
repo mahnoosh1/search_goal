@@ -325,6 +325,9 @@ public class Q_table {
                     if (tempx.get("val")> Qmax) {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
+                        if (diff_proper.isNaN()) {
+                            break;
+                        }
                     }
                 }
             }
@@ -337,6 +340,9 @@ public class Q_table {
                     if (tempx.get("val")> Qmax ) {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
+                        if (diff_proper.isNaN()) {
+                            break;
+                        }
                     }
                 }
             }
@@ -348,16 +354,30 @@ public class Q_table {
                     if (tempx.get("val")> Qmax) {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
+                        if (diff_proper.isNaN()) {
+                            break;
+                        }
                     }
                 }
             }
         }
-        if (diff_proper!=-100.0 && diff_proper!=0.0) {
-            action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp);
-            return action;
+        if (diff_proper.isNaN()) {
+            if (section==2) {
+                action="left";
+            }
+            if (section==0) {
+                action="right";
+            }
         }
         else {
-            return randomAction();
+            if (diff_proper!=-100.0 && diff_proper!=0.0) {
+                action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp);
+
+            }
+            else {
+                action= randomAction();
+            }
         }
+        return action;
     }
 }

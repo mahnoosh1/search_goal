@@ -194,6 +194,21 @@ public class middle_agent extends Agent {
         }
         return section;
     }
+    public int defineSection(String action, Boolean hit) {
+        ArrayList<Integer> pos=getNextPos(action, hit);
+        int sec=0;
+        if (pos.get(0)<100) {
+            sec= 0;
+        }
+        if (pos.get(0)>=100 && pos.get(0)<=200) {
+            sec= 1;
+        }
+        if (pos.get(0)>200) {
+            sec= 2;
+        }
+        return sec;
+    }
+
     public Double dist(int p0x, int p0y, int p1x, int p1y) {
         return Math.sqrt((p0x-p1x)*(p0x-p1x) + (p0y-p1y)*(p0y-p1y));
     }
@@ -206,22 +221,35 @@ public class middle_agent extends Agent {
     public Double calcReward(int x, int y,int x_prev, int y_prev,Boolean hitBlock) {
         Double r = 0.0;
         if (hitBlock) {
-            r=-100.0;
+            r=-1000.0;
         } else {
             if(this.section == 0){
-                r = 50*(this.dist(x_prev, y_prev, this.ent_left_mid_x, this.ent_left_mid_y)-this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y));
+                if(this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y)<this.dist(x_prev, y_prev, this.ent_left_mid_x, this.ent_left_mid_y)) {
+                    r=500.0;
+                }
+                else{
+                    r=-500.0;
+                }
             }
             if(this.section == 1){
-                r = 50*(this.dist(x_prev, y_prev, this.x_goal, this.y_goal)- this.dist(x, y, this.x_goal, this.y_goal));;
+                if (this.dist(x, y, this.x_goal, this.y_goal)<this.dist(x_prev, y_prev, this.x_goal, this.y_goal)) {
+                    r=500.0;
+                }
+                else {
+                    r=-500.0;
+                }
             }
             if(this.section == 2){
-                r = 50*(this.dist(x_prev, y_prev, this.ent_right_mid_x, this.ent_right_mid_y)-this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y));
+                if (this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y)<this.dist(x_prev, y_prev, this.ent_right_mid_x, this.ent_right_mid_y)) {
+                    r=500.0;
+                }
+                else {
+                    r=-500.0;
+                }
             }
             if (hit_goal(x,y)) {
-                r= 100.0;
+                r= 1000.0;
             }
-            else
-                r=r;
         }
         return r;
     }
@@ -738,7 +766,7 @@ public class middle_agent extends Agent {
         Boolean hitBlock1 = updatePosition(action1, false);
         ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
         Double reward1 = calcReward(pos1.get(0), pos1.get(1),this.x,this.y,hitBlock1);
-        if (reward1>reward) {
+        if (reward1>reward ) {
             ax=action1;//action
         }
         else {
@@ -821,7 +849,7 @@ public class middle_agent extends Agent {
                         if (inBound(action)) {
                             Boolean hitBlock = updatePosition(action,false);
                             String state = calcState(action, hitBlock);
-                            int section_new=defineSection();
+                            int section_new=defineSection(action, hitBlock);
                             Double reward=0.0;
                             if (section==0 && section_new==1) {
                                 reward=50.0;
@@ -830,10 +858,10 @@ public class middle_agent extends Agent {
                                 reward=50.0;
                             }
                             else if (section==1 && section_new==0) {
-                                reward=-100.0;
+                                reward=-50.0;
                             }
                             else if (section==1 && section_new==2) {
-                                reward=-100.0;
+                                reward=-50.0;
                             }
                             else {
                                 ArrayList<Integer> pos = getNextPos(action,hitBlock);

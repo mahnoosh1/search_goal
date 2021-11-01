@@ -50,8 +50,14 @@ public class coordinator extends Agent implements Serializable {
         for (String k1: main.keySet()) {
             if (sub.containsKey(k1)) {
                 ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
-                temp.put("val", (main.get(k1).get("val")+sub.get(k1).get("val"))/2);
-                temp.put("diff", (main.get(k1).get("diff")+sub.get(k1).get("diff"))/2);
+                if (main.get(k1).get("val")>=sub.get(k1).get("val")) {
+                    temp.put("val", main.get(k1).get("val"));
+                    temp.put("diff", main.get(k1).get("diff"));
+                }
+                else {
+                    temp.put("val", sub.get(k1).get("val"));
+                    temp.put("diff", sub.get(k1).get("diff"));
+                }
                 total.put(k1, temp);
             }
             else {
