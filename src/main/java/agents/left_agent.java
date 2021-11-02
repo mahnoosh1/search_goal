@@ -47,6 +47,7 @@ public class left_agent extends Agent{
 //    private int ent_out_y_left=301;
     private int d=10;
     private int a=5;
+    private Boolean prevset=false;
     public Boolean rand=true;
     PrintWriter writer = null;
     public ArrayList<Integer> avg_step = new ArrayList<Integer>();
@@ -790,7 +791,6 @@ public class left_agent extends Agent{
                     initial();
                     for(int i=0;i<max_step;i++) {
                         //////////////////////
-
                         /////////////////////
                         getDecider(episode);
                         section=defineSection();
@@ -811,12 +811,16 @@ public class left_agent extends Agent{
                             action=validate(action,action1,episode);
                         }
                         if (randloop && randloopcounter<3) {
+                            prevset=true;
                             action=randomActionExcept(actionloop);
+
                             randloopcounter++;
                         }
                         if (randloop && randloopcounter>=3) {
-
+                            prevset=false;
                             randloop=false;
+                            actionsList=new ArrayList<>();
+                            actionloop=new ArrayList<>();
                         }
                         System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial+"x: "+x+"y "+y+" act "+action);
                         if (inBound(action)) {
@@ -847,19 +851,20 @@ public class left_agent extends Agent{
                                 actionloop.add(action);
                             }
                             else {
-                                boolean allEqual = false;
-                                if (actionsList.get(0)!=actionsList.get(1)) {
-                                    if (actionsList.get(0)==actionsList.get(2) && actionsList.get(1)==actionsList.get(3)) {
-                                        allEqual=true;
+                                if (!prevset) {
+
+                                    boolean allEqual = false;
+                                    if (actionsList.get(0)!=actionsList.get(1)) {
+                                        if (actionsList.get(0)==actionsList.get(2) && actionsList.get(1)==actionsList.get(3)) {
+                                            allEqual=true;
+                                        }
+                                    }
+                                    if (allEqual) {
+                                        randloop=true;
+                                        randloopcounter=0;
+
                                     }
                                 }
-                                if (allEqual) {
-                                    randloop=true;
-                                    randloopcounter=0;
-
-                                }
-                                actionloop=new ArrayList<String>();
-                                actionsList=new ArrayList<String>();
                             }
                             //////////////////////////
                             String nextpos= nextPosState(action, hitBlock);

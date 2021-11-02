@@ -260,7 +260,6 @@ public class Q_table {
             if(section == 0) {
                 Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_left_mid_xx,ent_left_mid_yy);
                 Double distance = Math.abs(diff_proper-diff_temp);
-
                 if (diff_temp == diff_proper) {
                     diff_close = distance;
                     action = this.actions.get(i);
