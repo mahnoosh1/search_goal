@@ -21,10 +21,11 @@ public class main_container {
         main_container a = new main_container();
 
         a.initMainContainerInPlatform("localhost", "9888", "MainContainer");
+        a.startAgentInPlatform("coordinator", "agents.coordinator");
+
         a.startAgentInPlatform("left_agent", "agents.left_agent");
         a.startAgentInPlatform("right_agent", "agents.right_agent");
         a.startAgentInPlatform("middle_agent", "agents.middle_agent");
-        a.startAgentInPlatform("coordinator", "agents.coordinator");
 
     }
 

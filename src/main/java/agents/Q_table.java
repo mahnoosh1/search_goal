@@ -17,10 +17,10 @@ public class Q_table {
     private int ent_left_mid_yy = 105;
     private int ent_right_mid_xx = 200;
     private int ent_right_mid_yy = 205;
-    private int ent_ou_x_right=200;
-    private int ent_out_y_right=301;
-    private int ent_ou_x_left=100;
-    private int ent_out_y_left=301;
+//    private int ent_ou_x_right=200;
+//    private int ent_out_y_right=301;
+//    private int ent_ou_x_left=100;
+//    private int ent_out_y_left=301;
     public int move_step=5;
     private ArrayList<entrance> entrances_left = new ArrayList<entrance>();
     private ArrayList<entrance> entrances_right = new ArrayList<entrance>();
@@ -185,6 +185,14 @@ public class Q_table {
 
         return hitBlock;
     }
+    public double theta(int x0,int y0,int x1,int y1) {
+        double Rad2Deg = 180.0 / Math.PI;
+        double d=Math.atan2(y1-y0, x1 - x0) * Rad2Deg;
+        if (d<0) {
+            d=360+d;
+        }
+        return d;
+    }
 
     public double findAngle(double p0x,double p0y,double p1x,double p1y,double p2x,double p2y) {
         double a = Math.pow(p1x-p0x,2) + Math.pow(p1y-p0y,2),
@@ -236,20 +244,8 @@ public class Q_table {
         Double x2=0.0;
         Boolean hit= this.updatePosition(x,y,action,this.move_step);
         ArrayList<Integer> nextPos = this.getNextPos(x,y,action,hit);
-        if (x>=150) {
-            x1 = this.findAngle(x_goal, y_goal, x,y,ent_ou_x_right, ent_out_y_right);
-        }
-        if (x<150) {
-            x1 = this.findAngle(x_goal, y_goal, x,y,ent_ou_x_left, ent_out_y_left);
-        }
-        if(nextPos.get(0)>=150) {
-            x2 = this.findAngle(x_goal, y_goal, nextPos.get(0),nextPos.get(1), ent_ou_x_right, ent_out_y_right);
-
-        }
-        if (nextPos.get(0)<150){
-            x2 = this.findAngle(x_goal, y_goal, nextPos.get(0),nextPos.get(1), ent_ou_x_left, ent_out_y_left);
-
-        }
+        x1=theta(x_goal,y_goal,x,y);
+        x2=theta(x_goal,y_goal,nextPos.get(0),nextPos.get(1));
         return x1-x2;
     }
     public String randomAction() {
