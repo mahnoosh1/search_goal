@@ -777,6 +777,7 @@ public class middle_agent extends Agent{
             }
             ok=!find;
         }
+
         return act;
     }
     private class Results extends TickerBehaviour {
@@ -822,6 +823,7 @@ public class middle_agent extends Agent{
                             actionsList=new ArrayList<>();
                             actionloop=new ArrayList<>();
                         }
+
                         System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial+"x: "+x+"y "+y+" act "+action);
                         if (inBound(action)) {
                             Boolean hitBlock = updatePosition(action,false);
@@ -846,13 +848,12 @@ public class middle_agent extends Agent{
 
                             }
                             //////////////////////////
-                            if (actionsList.size()<4) {
+                            if (actionsList.size()<=3) {
                                 actionsList.add(action);
                                 actionloop.add(action);
                             }
                             else {
                                 if (!prevset) {
-
                                     boolean allEqual = false;
                                     if (actionsList.get(0)!=actionsList.get(1)) {
                                         if (actionsList.get(0)==actionsList.get(2) && actionsList.get(1)==actionsList.get(3)) {
@@ -863,6 +864,10 @@ public class middle_agent extends Agent{
                                         randloop=true;
                                         randloopcounter=0;
 
+                                    }
+                                    else{
+                                        actionloop=new ArrayList<>();
+                                        actionsList=new ArrayList<>();
                                     }
                                 }
                             }
