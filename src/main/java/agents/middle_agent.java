@@ -269,10 +269,9 @@ public class middle_agent extends Agent{
         String string_diff = String.format("%.2f", diff);
         Double diff_convert= Double.parseDouble(string_diff);
         if (this.section == 0) {
-            Double x1 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-            Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
-            Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff_convert;
+            Double x4 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
+            Double x5=theta(ent_left_mid_x,ent_left_mid_y,this.x,this.y);
+            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a)+"#"+diff_convert;
         }
         if (this.section == 1) {
             Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
@@ -290,10 +289,9 @@ public class middle_agent extends Agent{
     public String calcStateHalf() {
         String s = "";
         if (this.section == 0) {
-            Double x1 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-            Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
-            Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            Double x4 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
+            Double x5=theta(ent_left_mid_x,ent_left_mid_y,this.x,this.y);
+            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a);
         }
         if (this.section == 1) {
             Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
@@ -313,10 +311,9 @@ public class middle_agent extends Agent{
         ArrayList<Integer> nextpos = new ArrayList<Integer>();
         nextpos = this.getNextPos(action, hitBlock);
         if (nextpos.get(0)<100) {
-            Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_left_mid_x,ent_left_mid_y);
-            Double x2 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
-            Double x3= findAngle(x_goal,y_goal, nextpos.get(0), nextpos.get(1), ent_left_mid_x,ent_left_mid_y);
-            nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            Double x4 = this.dist(nextpos.get(0), nextpos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
+            Double x5=theta(this.ent_left_mid_x, this.ent_left_mid_y,nextpos.get(0),nextpos.get(1));
+            nextstate= Math.round(x4/this.d)+"#"+Math.round(x5/this.a);
         }
         if (nextpos.get(0)>=100 && nextpos.get(0)<=200) {
             Double x4 = this.dist(nextpos.get(0), nextpos.get(1), this.x_goal, this.y_goal);
@@ -367,8 +364,8 @@ public class middle_agent extends Agent{
         Double x2=0.0;
         ArrayList<Integer> nextPos = this.getNextPos(action, hitBlock);
         if (this.section == 0) {
-            x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-            x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
+            x1=theta(this.ent_left_mid_x,this.ent_left_mid_y,this.x,this.y);
+            x2=theta(this.ent_left_mid_x,this.ent_left_mid_y,nextPos.get(0),nextPos.get(1));
         }
         if (this.section == 1) {
             x1=theta(this.x_goal,this.y_goal,this.x,this.y);

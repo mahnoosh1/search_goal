@@ -248,6 +248,15 @@ public class Q_table {
         x2=theta(x_goal,y_goal,nextPos.get(0),nextPos.get(1));
         return x1-x2;
     }
+    public Double diffAngleDoubleModifiedx(String action, int x, int y, int x_goal, int y_goal) {
+        Double x1 =0.0;
+        Double x2=0.0;
+        Boolean hit= this.updatePosition(x,y,action,this.move_step);
+        ArrayList<Integer> nextPos = this.getNextPos(x,y,action,hit);
+        x1=theta(ent_left_mid_xx,ent_left_mid_yy,x,y);
+        x2=theta(ent_left_mid_xx,ent_left_mid_yy,nextPos.get(0),nextPos.get(1));
+        return x1-x2;
+    }
     public String randomAction() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
         return this.actions.get(randomNum);
@@ -258,7 +267,7 @@ public class Q_table {
         String action = "";
         for (int i=0;i<this.actions.size();i++) {
             if(section == 0) {
-                Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_left_mid_xx,ent_left_mid_yy);
+                Double diff_temp = this.diffAngleDoubleModifiedx(this.actions.get(i),x,y,x_goal,y_goal);
                 Double distance = Math.abs(diff_proper-diff_temp);
                 if (diff_temp == diff_proper) {
                     diff_close = distance;
