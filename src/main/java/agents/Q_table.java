@@ -81,6 +81,7 @@ public class Q_table {
             }
         }
     }
+    //hh
     public Boolean isPath(int x, int y) {
         Boolean is = true;
         if (x==100) {
