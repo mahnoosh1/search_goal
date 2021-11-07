@@ -745,6 +745,7 @@ public class middle_agent extends Agent{
         }
         return hit;
     }
+    //kk
     public String validate(String action, String action1, int episode) {
         String ax="";
         Boolean hitBlock = updatePosition(action, false);
