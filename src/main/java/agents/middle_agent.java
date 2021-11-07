@@ -17,24 +17,24 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 
-public class middle_agent extends Agent{
+public class middle_agent extends Agent {
 
-    private  int id =1;
+    private int id = 1;
     private int decider = 0;
     private int step = 0;
     private int episode = 0;
     private int max_step = 2000;
     private int max_episodes = 500;
     public static int trial = 0;
-    public static int px=0;
+    public static int px = 0;
     private int max_trial = 1;
     private int x = 0;
-    private int y =0;
+    private int y = 0;
     private int section = 0;
     private ArrayList<String> actions = new ArrayList<String>();
     public static Q_table table = new Q_table();
     private int x_goal = 150;
-    private  int y_goal = 270;
+    private int y_goal = 270;
     private int move_step = 5;
     private ArrayList<entrance> entrances_left = new ArrayList<entrance>();
     private ArrayList<entrance> entrances_right = new ArrayList<entrance>();
@@ -42,170 +42,177 @@ public class middle_agent extends Agent{
     private int ent_left_mid_y = 105;
     private int ent_right_mid_x = 200;
     private int ent_right_mid_y = 205;
-    public static int f=0;
-    public static int ff=2;
+    public static int f = 0;
+    public static int ff = 2;
     //    private int ent_ou_x_right=200;
 //    private int ent_out_y_right=301;
 //    private int ent_ou_x_left=100;
 //    private int ent_out_y_left=301;
-    private int d=10;
-    private int a=5;
-    private Boolean prevset=false;
-    public Boolean rand=true;
+    private int d = 10;
+    private int a = 5;
+    private Boolean prevset = false;
+    public Boolean rand = true;
     PrintWriter writer = null;
+    PrintWriter writerposition = null;
     public ArrayList<Integer> avg_step = new ArrayList<Integer>();
-    public ArrayList<String> actionsList= new ArrayList<String>();
-    public Boolean randloop=false;
-    public int randloopcounter=0;
-    public ArrayList<String> actionloop=new ArrayList<String>();
+    public ArrayList<String> actionsList = new ArrayList<String>();
+    public Boolean randloop = false;
+    public int randloopcounter = 0;
+    public ArrayList<String> actionloop = new ArrayList<String>();
+
     protected void setup() {
         super.setup();
         try {
-            writer = new PrintWriter("Agent"+id+"info"+".txt", "UTF-8");
-
+            writer = new PrintWriter("Agent" + id + "info" + ".txt", "UTF-8");
+            writerposition = new PrintWriter("Agent"+id+"pos"+".txt", "UTF-8");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         this.initial();
-        this.actions.add("up");this.actions.add("down");this.actions.add("left");this.actions.add("right");
-        for(int i=0;i<10;i++) {
-            entrance ent_t = new entrance(100, 100+i);
-            entrance ent_tt = new entrance(200, 200+i);
+        this.actions.add("up");
+        this.actions.add("down");
+        this.actions.add("left");
+        this.actions.add("right");
+        for (int i = 0; i < 10; i++) {
+            entrance ent_t = new entrance(100, 100 + i);
+            entrance ent_tt = new entrance(200, 200 + i);
             this.entrances_left.add(ent_t);
             this.entrances_right.add(ent_tt);
 
         }
         addBehaviour(new middle_agent.Receiver());
-        addBehaviour(new middle_agent.Results(this,5000));
+        addBehaviour(new middle_agent.Results(this, 5000));
 
     }
+
     public void initial() {
         this.x = 150;
-        this.y= 30;
-        System.out.println("Agent "+id+" shoro "+this.x+"  "+this.y);
+        this.y = 30;
+        System.out.println("Agent " + id + " shoro " + this.x + "  " + this.y);
     }
+
     public void Randominitial(int randomNum) {
 
-        if (randomNum==0) {
+        if (randomNum == 0) {
             this.x = 50;
-            this.y= 30;
+            this.y = 30;
         }
-        if (randomNum==1) {
+        if (randomNum == 1) {
             this.x = 150;
-            this.y= 30;
+            this.y = 30;
         }
-        if (randomNum==2) {
+        if (randomNum == 2) {
             this.x = 250;
-            this.y= 30;
+            this.y = 30;
         }
-        writer.println("Agent "+id+" shoro "+this.x+"  "+this.y+" epizode "+episode);
+        writer.println("Agent " + id + " shoro " + this.x + "  " + this.y + " epizode " + episode);
         writer.flush();
     }
+
     public String randomAction() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
         return this.actions.get(randomNum);
     }
+
     public Boolean updatePosition(String action, Boolean update) {
         int x_new = 0;
         int y_new = 0;
         Boolean hitBlock = false;
-        if (action == "up"){
-            y_new = this.y+this.move_step;
+        if (action == "up") {
+            y_new = this.y + this.move_step;
             x_new = this.x;
         }
-        if (action == "down"){
-            y_new = this.y-this.move_step;
+        if (action == "down") {
+            y_new = this.y - this.move_step;
             x_new = this.x;
         }
-        if (action == "left"){
-            x_new = this.x-this.move_step;
+        if (action == "left") {
+            x_new = this.x - this.move_step;
             y_new = this.y;
         }
-        if (action == "right"){
-            x_new = this.x+this.move_step;
+        if (action == "right") {
+            x_new = this.x + this.move_step;
             y_new = this.y;
         }
-        if ((x_new >= 0 && x_new<300) && (y_new>=0 && y_new<300)){
-            hitBlock = !isPath(x_new,y_new);
+        if ((x_new >= 0 && x_new < 300) && (y_new >= 0 && y_new < 300)) {
+            hitBlock = !isPath(x_new, y_new);
             if (!hitBlock) {
                 if (update) {
                     this.x = x_new;
-                    this.y=y_new;
+                    this.y = y_new;
                 }
             }
-        }
-        else {
-            hitBlock=true;
+        } else {
+            hitBlock = true;
         }
 
         return hitBlock;
     }
+
     public Boolean isPath(int x, int y) {
         Boolean is = true;
-        if (x==100) {
-            Boolean find=false;
-            for (int i=0;i<entrances_left.size();i++) {
-                if (y==entrances_left.get(i).getY()){
-                    find=true;
+        if (x == 100) {
+            Boolean find = false;
+            for (int i = 0; i < entrances_left.size(); i++) {
+                if (y == entrances_left.get(i).getY()) {
+                    find = true;
                     break;
                 }
             }
-            if (find==true) {
-                is=true;
+            if (find == true) {
+                is = true;
+            } else {
+                is = false;
             }
-            else {
-                is=false;
-            }
-        }
-        else if (x==200) {
-            Boolean find=false;
-            for (int i=0;i<entrances_right.size();i++) {
-                if (y==entrances_right.get(i).getY()){
-                    find=true;
+        } else if (x == 200) {
+            Boolean find = false;
+            for (int i = 0; i < entrances_right.size(); i++) {
+                if (y == entrances_right.get(i).getY()) {
+                    find = true;
                     break;
                 }
             }
-            if (find==true) {
-                is=true;
-            }
-            else {
-                is=false;
+            if (find == true) {
+                is = true;
+            } else {
+                is = false;
             }
         }
         return is;
     }
+
     public Boolean inBound(String action) {
         int x_new = 0;
         int y_new = 0;
         Boolean in = true;
-        if (action == "up"){
-            y_new = this.y+this.move_step;
+        if (action == "up") {
+            y_new = this.y + this.move_step;
             x_new = this.x;
         }
-        if (action == "down"){
-            y_new = this.y-this.move_step;
+        if (action == "down") {
+            y_new = this.y - this.move_step;
             x_new = this.x;
         }
-        if (action == "left"){
-            x_new = this.x-this.move_step;
+        if (action == "left") {
+            x_new = this.x - this.move_step;
             y_new = this.y;
         }
-        if (action == "right"){
-            x_new = this.x+this.move_step;
+        if (action == "right") {
+            x_new = this.x + this.move_step;
             y_new = this.y;
         }
-        if ((x_new >= 0 && x_new<300) && (y_new>=0 && y_new<300)){
+        if ((x_new >= 0 && x_new < 300) && (y_new >= 0 && y_new < 300)) {
             in = true;
-        }
-        else {
+        } else {
             in = false;
         }
         return in;
     }
+
     public int defineSection() {
-        int section=0;
+        int section = 0;
         if (this.x < 100) {
             section = 0;
         }
@@ -217,72 +224,75 @@ public class middle_agent extends Agent{
         }
         return section;
     }
+
     public int defineSection(String action, Boolean hit) {
-        ArrayList<Integer> pos=getNextPos(action, hit);
-        int sec=0;
-        if (pos.get(0)<100) {
-            sec= 0;
+        ArrayList<Integer> pos = getNextPos(action, hit);
+        int sec = 0;
+        if (pos.get(0) < 100) {
+            sec = 0;
         }
-        if (pos.get(0)>=100 && pos.get(0)<=200) {
-            sec= 1;
+        if (pos.get(0) >= 100 && pos.get(0) <= 200) {
+            sec = 1;
         }
-        if (pos.get(0)>200) {
-            sec= 2;
+        if (pos.get(0) > 200) {
+            sec = 2;
         }
         return sec;
     }
-    public double theta(int x0,int y0,int x1,int y1) {
+
+    public double theta(int x0, int y0, int x1, int y1) {
         double Rad2Deg = 180.0 / Math.PI;
-        double d=Math.atan2(y1-y0, x1 - x0) * Rad2Deg;
-        if (d<0) {
-            d=360+d;
+        double d = Math.atan2(y1 - y0, x1 - x0) * Rad2Deg;
+        if (d < 0) {
+            d = 360 + d;
         }
         return d;
     }
+
     public Double dist(int p0x, int p0y, int p1x, int p1y) {
-        return Math.sqrt((p0x-p1x)*(p0x-p1x) + (p0y-p1y)*(p0y-p1y));
+        return Math.sqrt((p0x - p1x) * (p0x - p1x) + (p0y - p1y) * (p0y - p1y));
     }
-    public double findAngle(double p0x,double p0y,double p1x,double p1y,double p2x,double p2y) {
-        double a = Math.pow(p1x-p0x,2) + Math.pow(p1y-p0y,2),
-                b = Math.pow(p1x-p2x,2) + Math.pow(p1y-p2y,2),
-                c = Math.pow(p2x-p0x,2) + Math.pow(p2y - p0y, 2);
-        return 57.2958*Math.acos( (a+b-c) / Math.sqrt(4*a*b) );
+
+    public double findAngle(double p0x, double p0y, double p1x, double p1y, double p2x, double p2y) {
+        double a = Math.pow(p1x - p0x, 2) + Math.pow(p1y - p0y, 2),
+                b = Math.pow(p1x - p2x, 2) + Math.pow(p1y - p2y, 2),
+                c = Math.pow(p2x - p0x, 2) + Math.pow(p2y - p0y, 2);
+        return 57.2958 * Math.acos((a + b - c) / Math.sqrt(4 * a * b));
     }
-    public Double calcReward(int x, int y,int x_prev, int y_prev,Boolean hitBlock) {
+
+    public Double calcReward(int x, int y, int x_prev, int y_prev, Boolean hitBlock) {
         Double r = 0.0;
         if (hitBlock) {
-            r=-1000.0;
+            r = -1000.0;
         } else {
-            if(this.section == 0){
-                if(this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y)<this.dist(x_prev, y_prev, this.ent_left_mid_x, this.ent_left_mid_y)) {
-                    r=500.0;
-                }
-                else{
-                    r=-500.0;
-                }
-            }
-            if(this.section == 1){
-                if (this.dist(x, y, this.x_goal, this.y_goal)<this.dist(x_prev, y_prev, this.x_goal, this.y_goal)) {
-                    r=500.0;
-                }
-                else {
-                    r=-500.0;
+            if (this.section == 0) {
+                if (this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y) < this.dist(x_prev, y_prev, this.ent_left_mid_x, this.ent_left_mid_y)) {
+                    r = 500.0;
+                } else {
+                    r = -500.0;
                 }
             }
-            if(this.section == 2){
-                if (this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y)<this.dist(x_prev, y_prev, this.ent_right_mid_x, this.ent_right_mid_y)) {
-                    r=500.0;
-                }
-                else {
-                    r=-500.0;
+            if (this.section == 1) {
+                if (this.dist(x, y, this.x_goal, this.y_goal) < this.dist(x_prev, y_prev, this.x_goal, this.y_goal)) {
+                    r = 500.0;
+                } else {
+                    r = -500.0;
                 }
             }
-            if (hit_goal(x,y)) {
-                r= 1000.0;
+            if (this.section == 2) {
+                if (this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y) < this.dist(x_prev, y_prev, this.ent_right_mid_x, this.ent_right_mid_y)) {
+                    r = 500.0;
+                } else {
+                    r = -500.0;
+                }
+            }
+            if (hit_goal(x, y)) {
+                r = 1000.0;
             }
         }
         return r;
     }
+
     public String calcState(String action, Boolean hitBlock) {
         String s = "";
         Double diff = this.diffAngleDouble(action, hitBlock);
@@ -296,7 +306,7 @@ public class middle_agent extends Agent{
         if (this.section == 1) {
             Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
             Double x5=theta(x_goal,y_goal,this.x,this.y);
-            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a)+"#"+diff_convert;
+            s = Math.round(x4/d)+"#"+Math.round(x5/a)+"#"+diff_convert;
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -316,7 +326,7 @@ public class middle_agent extends Agent{
         if (this.section == 1) {
             Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
             Double x5=theta(x_goal,y_goal,this.x,this.y);
-            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a);
+            s = Math.round(x4/d)+"#"+Math.round(x5/a);
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -745,7 +755,6 @@ public class middle_agent extends Agent{
         }
         return hit;
     }
-    //kk
     public String validate(String action, String action1, int episode) {
         String ax="";
         Boolean hitBlock = updatePosition(action, false);
@@ -755,7 +764,7 @@ public class middle_agent extends Agent{
         Boolean hitBlock1 = updatePosition(action1, false);
         ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
         Double reward1 = calcReward(pos1.get(0), pos1.get(1),this.x,this.y,hitBlock1);
-        if (reward1>reward && episode>25) {
+        if (reward1>reward) {
             ax=action1;//action
         }
         else {
@@ -848,7 +857,6 @@ public class middle_agent extends Agent{
                             actionsList=new ArrayList<>();
                             actionloop=new ArrayList<>();
                         }
-
                         System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+px+"x: "+x+"y "+y+" act "+action);
                         if (inBound(action)) {
                             Boolean hitBlock = updatePosition(action,false);
@@ -900,13 +908,27 @@ public class middle_agent extends Agent{
                             String nextpos= nextPosState(action, hitBlock);
                             Double diff = diffAngleDouble(action,hitBlock);
                             if (section == 0){
-                                table.update(state,nextpos,reward,diff,section,section_new);
+                                double sec_table=0.0;
+                                if(y>105){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.0;
+                                }
+                                table.update(state,nextpos,reward,diff,section,section_new,sec_table);
                             }
                             if (section==1) {
-                                table.update(state,nextpos,reward,diff,section,section_new);
+                                double sec_table=0.0;
+                                if(x>150){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.1;
+                                }
+                                table.update(state,nextpos,reward,diff,section,section_new,sec_table);
                             }
                             if (section==2) {
-                                table.update(state,nextpos,reward,diff,section,section_new);
+                                table.update(state,nextpos,reward,diff,section,section_new,0);
                             }
                         } else {
                             String state = calcState(action,true);
@@ -914,13 +936,27 @@ public class middle_agent extends Agent{
                             String nextpos= calcState(action, true);
                             Double diff = 0.0;
                             if (section == 0){
-                                table.update(state,nextpos,reward, (diff),section,section);
+                                double sec_table=0.0;
+                                if(y>105){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.0;
+                                }
+                                table.update(state,nextpos,reward, (diff),section,section,sec_table);
                             }
                             if (section==1) {
-                                table.update(state,nextpos,reward, (diff),section,section);
+                                double sec_table=0.0;
+                                if(x>150){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.1;
+                                }
+                                table.update(state,nextpos,reward, (diff),section,section,sec_table);
                             }
                             if (section == 2){
-                                table.update(state,nextpos,reward, (diff),section,section);
+                                table.update(state,nextpos,reward, (diff),section,section,0);
                             }
                         }
                         ///////////////////////////

@@ -55,10 +55,12 @@ public class coordinator extends Agent implements Serializable {
                 if (main.get(k1).get("val")>=sub.get(k1).get("val")) {
                     temp.put("val", main.get(k1).get("val"));
                     temp.put("diff", main.get(k1).get("diff"));
+                    temp.put("sect", main.get(k1).get("sect"));
                 }
                 else {
                     temp.put("val", sub.get(k1).get("val"));
                     temp.put("diff", sub.get(k1).get("diff"));
+                    temp.put("sect", sub.get(k1).get("sect"));
                 }
                 total.put(k1, temp);
             }

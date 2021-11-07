@@ -37,18 +37,18 @@ public class Q_table {
 
         }
     }
-    public void update(String state,String next_state, Double reward, Double diff_angle,int section, int new_section) {
+    public void update(String state,String next_state, Double reward, Double diff_angle,int section, int new_section,double sec_table) {
         if (section==0) {
             if (this.Q0_vals.containsKey(state)) {
                 Double new_val = this.Q0_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q0_vals.get(state).get("val"));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_angle);
+                val.put("val",new_val);val.put("diff",diff_angle);val.put("sect",sec_table);
                 this.Q0_vals.replace(state, val);
             }
             else {
                 Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_angle);
+                val.put("val",new_val);val.put("diff",diff_angle);val.put("sect",  sec_table);
                 this.Q0_vals.put(state, val);
             }
         }
@@ -56,13 +56,13 @@ public class Q_table {
             if (this.Q1_vals.containsKey(state)) {
                 Double new_val = this.Q1_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q1_vals.get(state).get("val"));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val+100);val.put("diff",diff_angle);
+                val.put("val",new_val+100);val.put("diff",diff_angle);val.put("sect",  sec_table);
                 this.Q1_vals.replace(state, val);
             }
             else {
                 Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val+100);val.put("diff",diff_angle);
+                val.put("val",new_val+100);val.put("diff",diff_angle);val.put("sect",  sec_table);
                 this.Q1_vals.put(state, val);
             }
         }
@@ -70,18 +70,18 @@ public class Q_table {
             if (this.Q2_vals.containsKey(state)) {
                 Double new_val = this.Q2_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q2_vals.get(state).get("val"));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_angle);
+                val.put("val",new_val);val.put("diff",diff_angle);val.put("sect", (double) sec_table);
                 this.Q2_vals.replace(state, val);
             }
             else {
                 Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_angle);
+                val.put("val",new_val);val.put("diff",diff_angle);val.put("sect", (double) sec_table);
                 this.Q2_vals.put(state, val);
             }
         }
     }
-    //hh
+
     public Boolean isPath(int x, int y) {
         Boolean is = true;
         if (x==100) {
@@ -323,13 +323,16 @@ public class Q_table {
         Double Qmax = -100000000.0;
         String action = null;
         Double diff_proper = -100.0;
+        double sect_proper=2.0;
         if (section==0) {
             for (String k : this.Q0_vals.keySet()) {
                 if (k.contains(temp)){
                     ConcurrentHashMap<String,Double> tempx = this.Q0_vals.get(k);
+
                     if (tempx.get("val")> Qmax) {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
+                        sect_proper=tempx.get("sect");
                         if (diff_proper.isNaN()) {
                             break;
                         }
@@ -341,10 +344,10 @@ public class Q_table {
             for (String k : this.Q1_vals.keySet()) {
                 if (k.contains(temp)){
                     ConcurrentHashMap<String,Double> tempx = this.Q1_vals.get(k);
-
                     if (tempx.get("val")> Qmax ) {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
+                        sect_proper=tempx.get("sect");
                         if (diff_proper.isNaN()) {
                             break;
                         }
@@ -376,6 +379,23 @@ public class Q_table {
         }
         else {
             if (diff_proper!=-100.0 && diff_proper!=0.0) {
+                if (section==0) {
+
+                    if (sect_proper==0 && y<=105) {
+                        diff_proper=-1*diff_proper;
+                    }
+                    if (sect_proper==1 && y>105) {
+                        diff_proper=-1*diff_proper;
+                    }
+                }
+                if (section==1) {
+                    if (sect_proper==0 && x<=150) {
+                        diff_proper=-1*diff_proper;
+                    }
+                    if (sect_proper==1 && x>150) {
+                        diff_proper=-1*diff_proper;
+                    }
+                }
                 action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp);
 
             }

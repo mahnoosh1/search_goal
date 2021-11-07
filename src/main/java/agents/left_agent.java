@@ -51,9 +51,11 @@ public class left_agent extends Agent{
 //    private int ent_out_y_left=301;
     private int d=10;
     private int a=5;
+
     private Boolean prevset=false;
     public Boolean rand=true;
     PrintWriter writer = null;
+    PrintWriter writerposition = null;
     public ArrayList<Integer> avg_step = new ArrayList<Integer>();
     public ArrayList<String> actionsList= new ArrayList<String>();
     public Boolean randloop=false;
@@ -63,7 +65,7 @@ public class left_agent extends Agent{
         super.setup();
         try {
             writer = new PrintWriter("Agent"+id+"info"+".txt", "UTF-8");
-
+            writerposition = new PrintWriter("Agent"+id+"pos"+".txt", "UTF-8");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -296,7 +298,7 @@ public class left_agent extends Agent{
         if (this.section == 1) {
             Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
             Double x5=theta(x_goal,y_goal,this.x,this.y);
-            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a)+"#"+diff_convert;
+            s = Math.round(x4/d)+"#"+Math.round(x5/a)+"#"+diff_convert;
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -316,7 +318,7 @@ public class left_agent extends Agent{
         if (this.section == 1) {
             Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
             Double x5=theta(x_goal,y_goal,this.x,this.y);
-            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a);
+            s = Math.round(x4/d)+"#"+Math.round(x5/a);
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -754,7 +756,7 @@ public class left_agent extends Agent{
         Boolean hitBlock1 = updatePosition(action1, false);
         ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
         Double reward1 = calcReward(pos1.get(0), pos1.get(1),this.x,this.y,hitBlock1);
-        if (reward1>reward && episode>25) {
+        if (reward1>reward) {
             ax=action1;//action
         }
         else {
@@ -847,7 +849,6 @@ public class left_agent extends Agent{
                             actionsList=new ArrayList<>();
                             actionloop=new ArrayList<>();
                         }
-
                         System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+px+"x: "+x+"y "+y+" act "+action);
                         if (inBound(action)) {
                             Boolean hitBlock = updatePosition(action,false);
@@ -899,13 +900,27 @@ public class left_agent extends Agent{
                             String nextpos= nextPosState(action, hitBlock);
                             Double diff = diffAngleDouble(action,hitBlock);
                             if (section == 0){
-                                table.update(state,nextpos,reward,diff,section,section_new);
+                                double sec_table=0.0;
+                                if(y>105){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.0;
+                                }
+                                table.update(state,nextpos,reward,diff,section,section_new,sec_table);
                             }
                             if (section==1) {
-                                table.update(state,nextpos,reward,diff,section,section_new);
+                                double sec_table=0.0;
+                                if(x>150){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.1;
+                                }
+                                table.update(state,nextpos,reward,diff,section,section_new,sec_table);
                             }
                             if (section==2) {
-                                table.update(state,nextpos,reward,diff,section,section_new);
+                                table.update(state,nextpos,reward,diff,section,section_new,0);
                             }
                         } else {
                             String state = calcState(action,true);
@@ -913,13 +928,27 @@ public class left_agent extends Agent{
                             String nextpos= calcState(action, true);
                             Double diff = 0.0;
                             if (section == 0){
-                                table.update(state,nextpos,reward, (diff),section,section);
+                                double sec_table=0.0;
+                                if(y>105){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.0;
+                                }
+                                table.update(state,nextpos,reward, (diff),section,section,sec_table);
                             }
                             if (section==1) {
-                                table.update(state,nextpos,reward, (diff),section,section);
+                                double sec_table=0.0;
+                                if(x>150){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.1;
+                                }
+                                table.update(state,nextpos,reward, (diff),section,section,sec_table);
                             }
                             if (section == 2){
-                                table.update(state,nextpos,reward, (diff),section,section);
+                                table.update(state,nextpos,reward, (diff),section,section,0);
                             }
                         }
                         ///////////////////////////
