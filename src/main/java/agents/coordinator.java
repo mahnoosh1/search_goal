@@ -1,6 +1,5 @@
 package agents;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -8,6 +7,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -43,6 +43,8 @@ public class coordinator extends Agent implements Serializable {
             fe.printStackTrace();
         }
         addBehaviour(new coordinator.Receiver());
+        addBehaviour(new coordinator.Results(this,5000));
+
 
     }
     public ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> aggregate(ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> main, ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> sub) {
@@ -94,6 +96,8 @@ public class coordinator extends Agent implements Serializable {
                 left_agent.table.Q2_vals = q2;
                 right_agent.table.Q2_vals = q2;
                 middle_agent.table.Q2_vals = q2;
+
+
                 System.out.println("update shod table ha");
                 if (msg.getPerformative() == ACLMessage.INFORM) {
 
@@ -104,8 +108,46 @@ public class coordinator extends Agent implements Serializable {
             }
         }
     }
+    public String getArray() {
+        ArrayList<String>m=new ArrayList<String>();
+        String x1="0,1,2";
+        String x2="0,2,1";
+        String x3="1,0,2";
+        String x4="1,2,0";
+        String x5="2,1,0";
+        String x6="2,0,1";
+        m.add(x1);
+        m.add(x2);
+        m.add(x3);
+        m.add(x4);
+        m.add(x5);
+        m.add(x6);
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 6);
+        return m.get(randomNum);
+    }
+    private class Results extends TickerBehaviour {
+        public Results(Agent a, long timeout)
+        {
+            super(a, timeout);
+        }
+        protected void onTick() {
+            String pos=getArray();
+            String poss[]=pos.split(",");
+            left_agent.ff=Integer.parseInt(poss[0]);
+            middle_agent.ff=Integer.parseInt(poss[1]);
+            right_agent.ff=Integer.parseInt(poss[2]);
+            if (left_agent.trial==right_agent.trial && right_agent.trial==middle_agent.trial && left_agent.trial==1) {
 
-
+                left_agent.trial=0;
+                middle_agent.trial=0;
+                right_agent.trial=0;
+                left_agent.px++;
+                right_agent.px++;
+                middle_agent.px++;
+                System.out.println("tamoooom shod");
+            }
+        }
+    }
 }
 
 

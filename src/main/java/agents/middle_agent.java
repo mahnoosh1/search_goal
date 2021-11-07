@@ -25,8 +25,9 @@ public class middle_agent extends Agent{
     private int episode = 0;
     private int max_step = 2000;
     private int max_episodes = 500;
-    private int trial = 0;
-    private int max_trial = 40;
+    public static int trial = 0;
+    public static int px=0;
+    private int max_trial = 1;
     private int x = 0;
     private int y =0;
     private int section = 0;
@@ -41,6 +42,8 @@ public class middle_agent extends Agent{
     private int ent_left_mid_y = 105;
     private int ent_right_mid_x = 200;
     private int ent_right_mid_y = 205;
+    public static int f=0;
+    public static int ff=2;
     //    private int ent_ou_x_right=200;
 //    private int ent_out_y_right=301;
 //    private int ent_ou_x_left=100;
@@ -81,8 +84,25 @@ public class middle_agent extends Agent{
     public void initial() {
         this.x = 150;
         this.y= 30;
+        System.out.println("Agent "+id+" shoro "+this.x+"  "+this.y);
     }
+    public void Randominitial(int randomNum) {
 
+        if (randomNum==0) {
+            this.x = 50;
+            this.y= 30;
+        }
+        if (randomNum==1) {
+            this.x = 150;
+            this.y= 30;
+        }
+        if (randomNum==2) {
+            this.x = 250;
+            this.y= 30;
+        }
+        writer.println("Agent "+id+" shoro "+this.x+"  "+this.y+" epizode "+episode);
+        writer.flush();
+    }
     public String randomAction() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
         return this.actions.get(randomNum);
@@ -734,7 +754,7 @@ public class middle_agent extends Agent{
         Boolean hitBlock1 = updatePosition(action1, false);
         ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
         Double reward1 = calcReward(pos1.get(0), pos1.get(1),this.x,this.y,hitBlock1);
-        if (reward1>reward) {
+        if (reward1>reward && episode>25) {
             ax=action1;//action
         }
         else {
@@ -786,7 +806,14 @@ public class middle_agent extends Agent{
             if (trial<max_trial) {
                 if (episode<max_episodes) {
                     int step_goal = 2000;
-                    initial();
+                    if (f==0) {
+                        f=1;
+                    }
+                    else {
+
+                        Randominitial(ff);
+
+                    }
                     for(int i=0;i<max_step;i++) {
                         //////////////////////
                         /////////////////////
@@ -821,7 +848,7 @@ public class middle_agent extends Agent{
                             actionloop=new ArrayList<>();
                         }
 
-                        System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial+"x: "+x+"y "+y+" act "+action);
+                        System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+px+"x: "+x+"y "+y+" act "+action);
                         if (inBound(action)) {
                             Boolean hitBlock = updatePosition(action,false);
                             String state = calcState(action, hitBlock);
@@ -926,12 +953,12 @@ public class middle_agent extends Agent{
                             writer.println("Agent "+id+" size table "+table.Q0_vals.size()+" "+table.Q1_vals.size()+" "+table.Q2_vals.size());
                             writer.flush();
                             step_goal = i;
-                            initial();
                             break;
                         }
                         updatePosition(action,true);
                     }
                     episode++;
+
                     avg_step.add(step_goal);
                 }
                 if (episode == max_episodes) {
@@ -940,10 +967,10 @@ public class middle_agent extends Agent{
                     writer.flush();
                     episode = 0;
                     step =0;
-                    initial();
+
                     PrintWriter writer1 = null;
                     try {
-                        writer1 = new PrintWriter("Agent"+id+"trial"+(trial-1)+".txt", "UTF-8");
+                        writer1 = new PrintWriter("Agent"+id+"trial"+(px)+".txt", "UTF-8");
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     } catch (UnsupportedEncodingException e) {
