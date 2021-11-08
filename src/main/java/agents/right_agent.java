@@ -762,7 +762,7 @@ public class right_agent extends Agent{
         Boolean hitBlock1 = updatePosition(action1, false);
         ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
         Double reward1 = calcReward(pos1.get(0), pos1.get(1),this.x,this.y,hitBlock1);
-        if (reward1>reward && episode>=3) {
+        if (reward1>reward && episode>=25) {
             ax=action1;//action
         }
         else {
