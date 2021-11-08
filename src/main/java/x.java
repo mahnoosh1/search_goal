@@ -111,16 +111,19 @@ public class x {
 //}
         int x_goal=150;
         int y_goal=295;
-        int x=50;
-        int y=145;
-        Double x5=theta(150,295,140,150);
-        Double diff_temp1 = diffAngleDoubleModifiedx("right",x,y,x_goal,y_goal);
-        Double diff_temp2 = diffAngleDoubleModifiedx("down",x,y,x_goal,y_goal);
-        Double diff_temp3 = diffAngleDoubleModifiedx("left",x,y,x_goal,y_goal);
-        Double diff_temp4 = diffAngleDoubleModifiedx("up",x,y,x_goal,y_goal);
-        System.out.println(diff_temp1+"  "+diff_temp2+"  "+diff_temp3+"  "+diff_temp4);
-        int c=0;
-        Double v= (double)c;
-        System.out.println(v);
+        int x=150;
+        int y=105;
+        ;
+        Double diff_temp4 = diffAngleDoubleModified("up",x,y,x_goal,y_goal);
+        System.out.println(diff_temp4);
+
+        x=100;
+        y=105;
+        ;
+       Double diff_temp1 = diffAngleDoubleModified("up",x,y,x_goal,y_goal);
+        Double diff_temp2 = diffAngleDoubleModified("right",x,y,x_goal,y_goal);
+        Double diff_temp3 = diffAngleDoubleModified("down",x,y,x_goal,y_goal);
+        diff_temp4 = diffAngleDoubleModified("left",x,y,x_goal,y_goal);
+        System.out.println(diff_temp1+" "+diff_temp2+" "+diff_temp3+" "+diff_temp4);
     }
 }

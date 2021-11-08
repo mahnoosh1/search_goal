@@ -22,7 +22,7 @@ public class right_agent extends Agent{
     private  int id =2;
     private int decider = 0;
     private int step = 0;
-    private int episode = 0;
+    public static int episode = 0;
     private int max_step = 2000;
     private int max_episodes = 500;
     public static int trial = 0;
@@ -43,18 +43,18 @@ public class right_agent extends Agent{
     private int ent_right_mid_x = 200;
     private int ent_right_mid_y = 205;
     public static int f=0;
-    public static int ff=0;
+    public static int ff=1;
+
     //    private int ent_ou_x_right=200;
 //    private int ent_out_y_right=301;
 //    private int ent_ou_x_left=100;
 //    private int ent_out_y_left=301;
     private int d=10;
     private int a=5;
+
     private Boolean prevset=false;
     public Boolean rand=true;
     PrintWriter writer = null;
-    PrintWriter writerposition = null;
-
     public ArrayList<Integer> avg_step = new ArrayList<Integer>();
     public ArrayList<String> actionsList= new ArrayList<String>();
     public Boolean randloop=false;
@@ -64,8 +64,6 @@ public class right_agent extends Agent{
         super.setup();
         try {
             writer = new PrintWriter("Agent"+id+"info"+".txt", "UTF-8");
-            writerposition = new PrintWriter("Agent"+id+"pos"+".txt", "UTF-8");
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -250,37 +248,34 @@ public class right_agent extends Agent{
                 c = Math.pow(p2x-p0x,2) + Math.pow(p2y - p0y, 2);
         return 57.2958*Math.acos( (a+b-c) / Math.sqrt(4*a*b) );
     }
-    public Double calcReward(int x, int y,int x_prev, int y_prev,Boolean hitBlock) {
+    public Double calcReward(int x, int y, int x_prev, int y_prev, Boolean hitBlock) {
         Double r = 0.0;
         if (hitBlock) {
-            r=-1000.0;
+            r = -1000.0;
         } else {
-            if(this.section == 0){
-                if(this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y)<this.dist(x_prev, y_prev, this.ent_left_mid_x, this.ent_left_mid_y)) {
-                    r=500.0;
-                }
-                else{
-                    r=-500.0;
-                }
-            }
-            if(this.section == 1){
-                if (this.dist(x, y, this.x_goal, this.y_goal)<this.dist(x_prev, y_prev, this.x_goal, this.y_goal)) {
-                    r=500.0;
-                }
-                else {
-                    r=-500.0;
+            if (this.section == 0) {
+                if (this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y) < this.dist(x_prev, y_prev, this.ent_left_mid_x, this.ent_left_mid_y)) {
+                    r = 500.0;
+                } else {
+                    r = -500.0;
                 }
             }
-            if(this.section == 2){
-                if (this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y)<this.dist(x_prev, y_prev, this.ent_right_mid_x, this.ent_right_mid_y)) {
-                    r=500.0;
-                }
-                else {
-                    r=-500.0;
+            if (this.section == 1) {
+                if (this.dist(x, y, this.x_goal, this.y_goal) < this.dist(x_prev, y_prev, this.x_goal, this.y_goal)) {
+                    r = 500.0;
+                } else {
+                    r = -500.0;
                 }
             }
-            if (hit_goal(x,y)) {
-                r= 1000.0;
+            if (this.section == 2) {
+                if (this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y) < this.dist(x_prev, y_prev, this.ent_right_mid_x, this.ent_right_mid_y)) {
+                    r = 500.0;
+                } else {
+                    r = -500.0;
+                }
+            }
+            if (hit_goal(x, y)) {
+                r = 1000.0;
             }
         }
         return r;
@@ -293,12 +288,14 @@ public class right_agent extends Agent{
         if (this.section == 0) {
             Double x4 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
             Double x5=theta(ent_left_mid_x,ent_left_mid_y,this.x,this.y);
-            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a)+"#"+diff_convert;
+            int dd=20;int aa=1;
+            s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+diff_convert;
         }
         if (this.section == 1) {
             Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
             Double x5=theta(x_goal,y_goal,this.x,this.y);
-            s = Math.round(x4/d)+"#"+Math.round(x5/a)+"#"+diff_convert;
+            int dd=20;int aa=1;
+            s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+diff_convert;
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -313,12 +310,14 @@ public class right_agent extends Agent{
         if (this.section == 0) {
             Double x4 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
             Double x5=theta(ent_left_mid_x,ent_left_mid_y,this.x,this.y);
-            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a);
+            int dd=20;int aa=1;
+            s = Math.round(x4/dd)+"#"+Math.round(x5/aa);
         }
         if (this.section == 1) {
             Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
             Double x5=theta(x_goal,y_goal,this.x,this.y);
-            s = Math.round(x4/d)+"#"+Math.round(x5/a);
+            int dd=20;int aa=1;
+            s = Math.round(x4/dd)+"#"+Math.round(x5/aa);
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -435,8 +434,11 @@ public class right_agent extends Agent{
             for (String k : table.Q0_vals.keySet()) {
                 if (k.contains(state)){
                     ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
-                    temp = table.Q0_vals.get(k);
-                    Q.put(k, temp);
+                    if (table.Q0_vals.get(k).get("val")>0) {
+                        temp = table.Q0_vals.get(k);
+                        Q.put(k, temp);
+                    }
+
                 }
             }
         }
@@ -444,8 +446,10 @@ public class right_agent extends Agent{
             for (String k : table.Q1_vals.keySet()) {
                 if (k.contains(state)){
                     ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
-                    temp = table.Q1_vals.get(k);
-                    Q.put(k, temp);
+                    if (table.Q1_vals.get(k).get("val")>0) {
+                        temp = table.Q1_vals.get(k);
+                        Q.put(k, temp);
+                    }
                 }
             }
         }
@@ -453,8 +457,10 @@ public class right_agent extends Agent{
             for (String k : table.Q2_vals.keySet()) {
                 if (k.contains(state)){
                     ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
-                    temp = table.Q2_vals.get(k);
-                    Q.put(k, temp);
+                    if (table.Q2_vals.get(k).get("val")>0) {
+                        temp = table.Q2_vals.get(k);
+                        Q.put(k, temp);
+                    }
                 }
             }
         }
@@ -483,13 +489,13 @@ public class right_agent extends Agent{
                     case 9:
                         this.rand=false;
                         if (this.section == 0){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
                         }
                         if (this.section==1){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
                         }
                         if (this.section==2){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
                         }
                 }
             }
@@ -510,13 +516,13 @@ public class right_agent extends Agent{
                     case 9:
                         this.rand=false;
                         if (this.section == 0){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
                         }
                         if (this.section==1){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
                         }
                         if (this.section==2){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
                         }
 
                         break;
@@ -539,13 +545,13 @@ public class right_agent extends Agent{
                     case 9:
                         this.rand=false;
                         if (this.section == 0){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
                         }
                         if (this.section==1){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
                         }
                         if (this.section==2){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
                         }
 
                         break;
@@ -568,13 +574,13 @@ public class right_agent extends Agent{
                     case 9:
                         this.rand=false;
                         if (this.section == 0){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
                         }
                         if (this.section==1){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
                         }
                         if (this.section==2){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
                         }
 
                         break;
@@ -597,13 +603,13 @@ public class right_agent extends Agent{
                     case 9:
                         this.rand=false;
                         if (this.section == 0){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
                         }
                         if (this.section==1){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
                         }
                         if (this.section==2){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
                         }
 
                         break;
@@ -626,13 +632,13 @@ public class right_agent extends Agent{
                     case 9:
                         this.rand=false;
                         if (this.section == 0){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
                         }
                         if (this.section==1){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
                         }
                         if (this.section==2){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
                         }
 
                         break;
@@ -655,13 +661,13 @@ public class right_agent extends Agent{
                     case 9:
                         this.rand=false;
                         if (this.section == 0){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
                         }
                         if (this.section==1){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
                         }
                         if (this.section==2){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
                         }
 
                         break;
@@ -684,13 +690,13 @@ public class right_agent extends Agent{
                     case 9:
                         this.rand=false;
                         if (this.section == 0){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
                         }
                         if (this.section==1){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
                         }
                         if (this.section==2){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
                         }
 
                         break;
@@ -713,13 +719,13 @@ public class right_agent extends Agent{
                     case 9:
                         this.rand=false;
                         if (this.section == 0){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
                         }
                         if (this.section==1){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
                         }
                         if (this.section==2){
-                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
                         }
 
                         break;
@@ -827,13 +833,13 @@ public class right_agent extends Agent{
                         ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>  temp = All_Q_vals(stateHalf);
                         if (rand==true && temp.size()>0) {
                             if (section == 0){
-                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 0);
+                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 0,id);
                             }
                             if (section==1){
-                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 1);
+                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 1,id);
                             }
                             if (section==2){
-                                action1 = table.getAction(stateHalf,x, y, x_goal,  y_goal, 2);
+                                action1 = table.getAction(stateHalf,x, y, x_goal,  y_goal, 2,id);
                             }
                             action=validate(action,action1,episode);
                         }
@@ -915,7 +921,7 @@ public class right_agent extends Agent{
                                     sec_table=0.0;
                                 }
                                 else {
-                                    sec_table=1.1;
+                                    sec_table=1.0;
                                 }
                                 table.update(state,nextpos,reward,diff,section,section_new,sec_table);
                             }
@@ -943,7 +949,7 @@ public class right_agent extends Agent{
                                     sec_table=0.0;
                                 }
                                 else {
-                                    sec_table=1.1;
+                                    sec_table=1.0;
                                 }
                                 table.update(state,nextpos,reward, (diff),section,section,sec_table);
                             }

@@ -1,5 +1,8 @@
 package agents;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,12 +25,23 @@ public class Q_table {
 //    private int ent_ou_x_left=100;
 //    private int ent_out_y_left=301;
     public int move_step=5;
+    PrintWriter writerposition=null;
     private ArrayList<entrance> entrances_left = new ArrayList<entrance>();
     private ArrayList<entrance> entrances_right = new ArrayList<entrance>();
+    private int x_goal = 150;
+    private  int y_goal = 270;
     public Q_table() {
         Q0_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
         Q1_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
         Q2_vals = new ConcurrentHashMap<String, ConcurrentHashMap<String,Double>> ();
+        try {
+            writerposition = new PrintWriter("Agent middle"+".txt", "UTF-8");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         this.actions.add("up");this.actions.add("down");this.actions.add("left");this.actions.add("right");
         for(int i=0;i<10;i++) {
             entrance ent_t = new entrance(100, 100+i);
@@ -38,17 +52,20 @@ public class Q_table {
         }
     }
     public void update(String state,String next_state, Double reward, Double diff_angle,int section, int new_section,double sec_table) {
+
+        String string_diff = String.format("%.2f", diff_angle);
+        Double diff_convert= Double.parseDouble(string_diff);
         if (section==0) {
             if (this.Q0_vals.containsKey(state)) {
                 Double new_val = this.Q0_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q0_vals.get(state).get("val"));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_angle);val.put("sect",sec_table);
+                val.put("val",new_val);val.put("diff",diff_convert);val.put("sect",sec_table);
                 this.Q0_vals.replace(state, val);
             }
             else {
                 Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_angle);val.put("sect",  sec_table);
+                val.put("val",new_val);val.put("diff",diff_convert);val.put("sect",  sec_table);
                 this.Q0_vals.put(state, val);
             }
         }
@@ -56,13 +73,13 @@ public class Q_table {
             if (this.Q1_vals.containsKey(state)) {
                 Double new_val = this.Q1_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q1_vals.get(state).get("val"));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val+100);val.put("diff",diff_angle);val.put("sect",  sec_table);
+                val.put("val",new_val+100);val.put("diff",diff_convert);val.put("sect",  sec_table);
                 this.Q1_vals.replace(state, val);
             }
             else {
                 Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val+100);val.put("diff",diff_angle);val.put("sect",  sec_table);
+                val.put("val",new_val+100);val.put("diff",diff_convert);val.put("sect",  sec_table);
                 this.Q1_vals.put(state, val);
             }
         }
@@ -70,13 +87,13 @@ public class Q_table {
             if (this.Q2_vals.containsKey(state)) {
                 Double new_val = this.Q2_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q2_vals.get(state).get("val"));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_angle);val.put("sect", (double) sec_table);
+                val.put("val",new_val);val.put("diff",diff_convert);val.put("sect", (double) sec_table);
                 this.Q2_vals.replace(state, val);
             }
             else {
                 Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_angle);val.put("sect", (double) sec_table);
+                val.put("val",new_val);val.put("diff",diff_convert);val.put("sect", (double) sec_table);
                 this.Q2_vals.put(state, val);
             }
         }
@@ -262,39 +279,113 @@ public class Q_table {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
         return this.actions.get(randomNum);
     }
+    public Double calcReward(int x, int y, int x_prev, int y_prev, Boolean hitBlock,int section) {
+        Double r = 0.0;
+        if (hitBlock) {
+            r = -1000.0;
+        } else {
+            if (section == 0) {
+                if (this.dist(x, y, ent_left_mid_xx, this.ent_left_mid_yy) < this.dist(x_prev, y_prev, ent_left_mid_xx, this.ent_left_mid_yy)) {
+                    r = 500.0;
+                } else {
+                    r = -500.0;
+                }
+            }
+            if (section == 1) {
+                if (this.dist(x, y,this.x_goal , this.y_goal) < this.dist(x_prev, y_prev, this.x_goal, this.y_goal)) {
+                    r = 500.0;
+                } else {
+                    r = -500.0;
+                }
+            }
+            if (section == 2) {
+                if (this.dist(x, y, this.ent_right_mid_xx, this.ent_right_mid_yy) < this.dist(x_prev, y_prev, this.ent_right_mid_xx, this.ent_right_mid_yy)) {
+                    r = 500.0;
+                } else {
+                    r = -500.0;
+                }
+            }
 
-    public String mapAction(int x, int y, int x_goal, int y_goal, int section, Double diff_proper,String temp) {
+        }
+        return r;
+    }
+
+    public String mapAction(int x, int y, int x_goal, int y_goal, int section, Double diff_proper,String temp,int id) {
         Double diff_close = 1000000000.0;
         String action = "";
+        ArrayList<String> actionList=new ArrayList<>();
+        if(section==1) {
+            if(id==0 && left_agent.episode>100) {
+                for(String k: Q1_vals.keySet()){
+                    if (k.contains(temp)){
+                        writerposition.println(Q1_vals.get(k));
+                    }
+                }
+                writerposition.println("Agent "+id+" x: "+x+" y:"+y);
+                writerposition.flush();
+            }
+            if(id==1 && middle_agent.episode>100) {
+                for(String k: Q1_vals.keySet()){
+                    if (k.contains(temp)){
+                        writerposition.println(Q1_vals.get(k));
+                    }
+                }
+                writerposition.println("Agent "+id+" x: "+x+" y:"+y);
+                writerposition.flush();
+            }
+            if(id==2 && right_agent.episode>100) {
+                for(String k: Q1_vals.keySet()){
+                    if (k.contains(temp)){
+                        writerposition.println(Q1_vals.get(k));
+                    }
+                }
+                writerposition.println("Agent "+id+" x: "+x+" y:"+y);
+                writerposition.flush();
+            }
+        }
+
         for (int i=0;i<this.actions.size();i++) {
             if(section == 0) {
                 Double diff_temp = this.diffAngleDoubleModifiedx(this.actions.get(i),x,y,x_goal,y_goal);
                 Double distance = Math.abs(diff_proper-diff_temp);
                 if (diff_temp == diff_proper) {
                     diff_close = distance;
-                    action = this.actions.get(i);
-                    break;
+                    actionList.add(this.actions.get(i));
                 }
                 else {
-                    if (distance < diff_close) {
+                    if (distance <= diff_close) {
                         diff_close = distance;
-                        action = this.actions.get(i);
-
+                        action=(this.actions.get(i));
                     }
                 }
             }
             if(section == 1) {
                 Double diff_temp = this.diffAngleDoubleModified(this.actions.get(i),x,y,x_goal,y_goal);
                 Double distance = Math.abs(diff_proper-diff_temp);
+                if(id==0 && left_agent.episode>100){
+                    writerposition.println("Agent "+id+" "+actions.get(i)+"  "+diff_temp+"  "+diff_proper);
+                    writerposition.println("//////////////////////////");
+                    writerposition.flush();
+                }
+                if(id==1 && middle_agent.episode>100){
+                    writerposition.println("Agent "+id+" "+actions.get(i)+"  "+diff_temp+"  "+diff_proper);
+                    writerposition.println("//////////////////////////");
+                    writerposition.flush();
+                }
+                if(id==2 && right_agent.episode>100){
+                    writerposition.println("Agent "+id+" "+actions.get(i)+"  "+diff_temp+"  "+diff_proper);
+                    writerposition.println("//////////////////////////");
+                    writerposition.flush();
+                }
                 if (diff_temp == diff_proper) {
                     diff_close = distance;
-                    action = this.actions.get(i);
-                    break;
+                    actionList.add(this.actions.get(i));
+
                 }
                 else {
                     if (distance < diff_close) {
                         diff_close = distance;
-                        action = this.actions.get(i);
+                        action=(this.actions.get(i));
 
                     }
                 }
@@ -304,23 +395,72 @@ public class Q_table {
                 Double distance = Math.abs(diff_proper-diff_temp);
                 if (diff_temp == diff_proper) {
                     diff_close = distance;
-                    action = this.actions.get(i);
+                    action=(this.actions.get(i));
                     break;
                 }
                 else {
                     if (distance < diff_close) {
                         diff_close = distance;
-                        action = this.actions.get(i);
-
+                        action=(this.actions.get(i));
                     }
                 }
             }
         }
+        if (actionList.size()==1) {
+            action=actionList.get(0);
+        }
+        if(actionList.size()==2) {
+            if(section==0) {
+                Boolean hit1= this.updatePosition(x,y,actionList.get(0),this.move_step);
+                ArrayList<Integer> nextPos1 = this.getNextPos(x,y,actionList.get(0),hit1);
+                Double reward1=this.calcReward(nextPos1.get(0),nextPos1.get(1),x,y,hit1,0);
+                Boolean hit2= this.updatePosition(x,y,actionList.get(1),this.move_step);
+                ArrayList<Integer> nextPos2 = this.getNextPos(x,y,actionList.get(1),hit2);
+                Double reward2=this.calcReward(nextPos2.get(0),nextPos2.get(1),x,y,hit2,0);
+                if (reward1<=reward2) {
+                    action=actionList.get(0);
+                }
+                else{
+                    action=actionList.get(1);
+                }
+            }
+            if(section==1) {
+                Boolean hit1= this.updatePosition(x,y,actionList.get(0),this.move_step);
+                ArrayList<Integer> nextPos1 = this.getNextPos(x,y,actionList.get(0),hit1);
+                Double reward1=this.calcReward(nextPos1.get(0),nextPos1.get(1),x,y,hit1,1);
+                Boolean hit2= this.updatePosition(x,y,actionList.get(1),this.move_step);
+                ArrayList<Integer> nextPos2 = this.getNextPos(x,y,actionList.get(1),hit2);
+                Double reward2=this.calcReward(nextPos2.get(0),nextPos2.get(1),x,y,hit2,1);
+                if (reward1<=reward2) {
+                    action=actionList.get(0);
+                }
+                else{
+                    action=actionList.get(1);
+                }
+            }
 
+        }
+        if(section==1) {
+            if(id==0 && left_agent.episode>100) {
+                writerposition.println("Agent "+id+" Action map "+action);
+                writerposition.flush();
+            }
+            if(id==1 && middle_agent.episode>100) {
+                writerposition.println("Agent "+id+" Action map "+action);
+                writerposition.flush();
+            }
+            if(id==2 && right_agent.episode>100) {
+                writerposition.println("Agent "+id+" Action map "+action);
+                writerposition.flush();
+            }
+        }
         return action;
     }
-    public String getAction(String temp, int x, int y, int x_goal, int y_goal, int section) {
-        Double Qmax = -100000000.0;
+    public Double dist(int p0x, int p0y, int p1x, int p1y) {
+        return Math.sqrt((p0x-p1x)*(p0x-p1x) + (p0y-p1y)*(p0y-p1y));
+    }
+    public String getAction(String temp, int x, int y, int x_goal, int y_goal, int section,int id) {
+        Double Qmax = 0.0;
         String action = null;
         Double diff_proper = -100.0;
         double sect_proper=2.0;
@@ -381,22 +521,26 @@ public class Q_table {
             if (diff_proper!=-100.0 && diff_proper!=0.0) {
                 if (section==0) {
 
-                    if (sect_proper==0 && y<=105) {
+                    if (sect_proper==0.0 && y<=105) {
                         diff_proper=-1*diff_proper;
+
                     }
-                    if (sect_proper==1 && y>105) {
+                    if (sect_proper==1.0 && y>105) {
                         diff_proper=-1*diff_proper;
+
                     }
                 }
                 if (section==1) {
-                    if (sect_proper==0 && x<=150) {
+                    if (sect_proper==0.0 && x<=150) {
                         diff_proper=-1*diff_proper;
+
                     }
-                    if (sect_proper==1 && x>150) {
+                    if (sect_proper==1.0 && x>150) {
                         diff_proper=-1*diff_proper;
+
                     }
                 }
-                action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp);
+                action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp,id);
 
             }
             else {
