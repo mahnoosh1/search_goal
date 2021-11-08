@@ -133,6 +133,7 @@ public class coordinator extends Agent implements Serializable {
             super(a, timeout);
         }
         protected void onTick() {
+
             String pos=getArray();
             String poss[]=pos.split(",");
             left_agent.ff=Integer.parseInt(poss[0]);

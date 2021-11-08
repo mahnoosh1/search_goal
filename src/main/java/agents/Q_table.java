@@ -464,6 +464,7 @@ public class Q_table {
         String action = null;
         Double diff_proper = -100.0;
         double sect_proper=2.0;
+        String act_proper="";
         if (section==0) {
             for (String k : this.Q0_vals.keySet()) {
                 if (k.contains(temp)){
@@ -473,6 +474,8 @@ public class Q_table {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
                         sect_proper=tempx.get("sect");
+                        String ss[] = k.split("#");
+                        act_proper=ss[2];
                         if (diff_proper.isNaN()) {
                             break;
                         }
@@ -488,6 +491,8 @@ public class Q_table {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
                         sect_proper=tempx.get("sect");
+                        String ss[] = k.split("#");
+                        act_proper=ss[2];
                         if (diff_proper.isNaN()) {
                             break;
                         }
@@ -518,30 +523,76 @@ public class Q_table {
             }
         }
         else {
-            if (diff_proper!=-100.0 && diff_proper!=0.0) {
+            if (diff_proper!=-100.0) {
                 if (section==0) {
-
                     if (sect_proper==0.0 && y<=105) {
                         diff_proper=-1*diff_proper;
-
+                            if(act_proper=="up") {
+                                action="down";
+                            }
+                        if(act_proper=="down") {
+                            action="up";
+                        }
                     }
-                    if (sect_proper==1.0 && y>105) {
+                    else if (sect_proper==1.0 && y>105) {
                         diff_proper=-1*diff_proper;
-
+                        if(act_proper=="up") {
+                            action="down";
+                        }
+                        if(act_proper=="down") {
+                            action="up";
+                        }
                     }
+                    else {action=act_proper;}
                 }
                 if (section==1) {
                     if (sect_proper==0.0 && x<=150) {
                         diff_proper=-1*diff_proper;
-
+                        if(act_proper=="right") {
+                            action="left";
+                        }
+                        if(act_proper=="left") {
+                            action="right";
+                        }
                     }
-                    if (sect_proper==1.0 && x>150) {
+                    else if (sect_proper==1.0 && x>150) {
                         diff_proper=-1*diff_proper;
-
+                        if(act_proper=="right") {
+                            action="left";
+                        }
+                        if(act_proper=="left") {
+                            action="right";
+                        }
+                    }
+                    else {action=act_proper;}
+                }
+                if(section==2) {
+                    action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp,id);
+                }
+                if(section==0) {
+                    String action1 = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp,id);
+                    Boolean hit1= this.updatePosition(x,y,action1,this.move_step);
+                    ArrayList<Integer> nextPos1 = this.getNextPos(x,y,action1,hit1);
+                    Double reward1=this.calcReward(nextPos1.get(0),nextPos1.get(1),x,y,hit1,0);
+                    Boolean hit2= this.updatePosition(x,y,action,this.move_step);
+                    ArrayList<Integer> nextPos2 = this.getNextPos(x,y,action,hit2);
+                    Double reward2=this.calcReward(nextPos2.get(0),nextPos2.get(1),x,y,hit2,0);
+                    if(reward1>=reward2) {
+                        action=action1;
                     }
                 }
-                action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp,id);
-
+                if(section==1) {
+                    String action1 = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp,id);
+                    Boolean hit1= this.updatePosition(x,y,action1,this.move_step);
+                    ArrayList<Integer> nextPos1 = this.getNextPos(x,y,action1,hit1);
+                    Double reward1=this.calcReward(nextPos1.get(0),nextPos1.get(1),x,y,hit1,1);
+                    Boolean hit2= this.updatePosition(x,y,action,this.move_step);
+                    ArrayList<Integer> nextPos2 = this.getNextPos(x,y,action,hit2);
+                    Double reward2=this.calcReward(nextPos2.get(0),nextPos2.get(1),x,y,hit2,1);
+                    if(reward1>=reward2) {
+                        action=action1;
+                    }
+                }
             }
             else {
                 action= randomAction();

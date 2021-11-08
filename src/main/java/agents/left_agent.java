@@ -49,7 +49,7 @@ public class left_agent extends Agent{
 //    private int ent_out_y_right=301;
 //    private int ent_ou_x_left=100;
 //    private int ent_out_y_left=301;
-    private int d=10;
+    private int d=30;
     private int a=5;
 
     private Boolean prevset=false;
@@ -289,13 +289,13 @@ public class left_agent extends Agent{
             Double x4 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
             Double x5=theta(ent_left_mid_x,ent_left_mid_y,this.x,this.y);
             int dd=20;int aa=1;
-            s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+diff_convert;
+            s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+action;
         }
         if (this.section == 1) {
             Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
             Double x5=theta(x_goal,y_goal,this.x,this.y);
             int dd=20;int aa=1;
-            s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+diff_convert;
+            s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+action;
         }
         if (this.section == 2) {
             Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -762,7 +762,7 @@ public class left_agent extends Agent{
         Boolean hitBlock1 = updatePosition(action1, false);
         ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
         Double reward1 = calcReward(pos1.get(0), pos1.get(1),this.x,this.y,hitBlock1);
-        if (reward1>reward) {
+        if (reward1>reward && episode>=3) {
             ax=action1;//action
         }
         else {

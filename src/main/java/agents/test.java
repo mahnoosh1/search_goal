@@ -22,11 +22,12 @@
 //    private  int id =0;
 //    private int decider = 0;
 //    private int step = 0;
-//    private int episode = 0;
+//    public static int episode = 0;
 //    private int max_step = 2000;
 //    private int max_episodes = 500;
-//    private int trial = 0;
-//    private int max_trial = 40;
+//    public static int trial = 0;
+//    public static int px=0;
+//    private int max_trial = 1;
 //    private int x = 0;
 //    private int y =0;
 //    private int section = 0;
@@ -41,12 +42,17 @@
 //    private int ent_left_mid_y = 105;
 //    private int ent_right_mid_x = 200;
 //    private int ent_right_mid_y = 205;
+//    public static int f=0;
+//    public static int ff=1;
+//
 //    //    private int ent_ou_x_right=200;
 ////    private int ent_out_y_right=301;
 ////    private int ent_ou_x_left=100;
 ////    private int ent_out_y_left=301;
 //    private int d=10;
 //    private int a=5;
+//
+//    private Boolean prevset=false;
 //    public Boolean rand=true;
 //    PrintWriter writer = null;
 //    public ArrayList<Integer> avg_step = new ArrayList<Integer>();
@@ -58,7 +64,6 @@
 //        super.setup();
 //        try {
 //            writer = new PrintWriter("Agent"+id+"info"+".txt", "UTF-8");
-//
 //        } catch (FileNotFoundException e) {
 //            e.printStackTrace();
 //        } catch (UnsupportedEncodingException e) {
@@ -78,10 +83,26 @@
 //
 //    }
 //    public void initial() {
-//        this.x = 60;
-//        this.y= 35;
+//        this.x = 50;
+//        this.y= 30;
+//        System.out.println("Agent "+id+" shoro "+this.x+"  "+this.y);
 //    }
-//
+//    public void Randominitial(int randomNum) {
+//        if (randomNum==0) {
+//            this.x = 50;
+//            this.y= 30;
+//        }
+//        if (randomNum==1) {
+//            this.x = 150;
+//            this.y= 30;
+//        }
+//        if (randomNum==2) {
+//            this.x = 250;
+//            this.y= 30;
+//        }
+//        writer.println("Agent "+id+" shoro "+this.x+"  "+this.y+" epizode "+episode);
+//        writer.flush();
+//    }
 //    public String randomAction() {
 //        int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
 //        return this.actions.get(randomNum);
@@ -227,37 +248,34 @@
 //                c = Math.pow(p2x-p0x,2) + Math.pow(p2y - p0y, 2);
 //        return 57.2958*Math.acos( (a+b-c) / Math.sqrt(4*a*b) );
 //    }
-//    public Double calcReward(int x, int y,int x_prev, int y_prev,Boolean hitBlock) {
+//    public Double calcReward(int x, int y, int x_prev, int y_prev, Boolean hitBlock) {
 //        Double r = 0.0;
 //        if (hitBlock) {
-//            r=-1000.0;
+//            r = -1000.0;
 //        } else {
-//            if(this.section == 0){
-//                if(this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y)<this.dist(x_prev, y_prev, this.ent_left_mid_x, this.ent_left_mid_y)) {
-//                    r=500.0;
-//                }
-//                else{
-//                    r=-500.0;
-//                }
-//            }
-//            if(this.section == 1){
-//                if (this.dist(x, y, this.x_goal, this.y_goal)<this.dist(x_prev, y_prev, this.x_goal, this.y_goal)) {
-//                    r=500.0;
-//                }
-//                else {
-//                    r=-500.0;
+//            if (this.section == 0) {
+//                if (this.dist(x, y, this.ent_left_mid_x, this.ent_left_mid_y) < this.dist(x_prev, y_prev, this.ent_left_mid_x, this.ent_left_mid_y)) {
+//                    r = 500.0;
+//                } else {
+//                    r = -500.0;
 //                }
 //            }
-//            if(this.section == 2){
-//                if (this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y)<this.dist(x_prev, y_prev, this.ent_right_mid_x, this.ent_right_mid_y)) {
-//                    r=500.0;
-//                }
-//                else {
-//                    r=-500.0;
+//            if (this.section == 1) {
+//                if (this.dist(x, y, this.x_goal, this.y_goal) < this.dist(x_prev, y_prev, this.x_goal, this.y_goal)) {
+//                    r = 500.0;
+//                } else {
+//                    r = -500.0;
 //                }
 //            }
-//            if (hit_goal(x,y)) {
-//                r= 1000.0;
+//            if (this.section == 2) {
+//                if (this.dist(x, y, this.ent_right_mid_x, this.ent_right_mid_y) < this.dist(x_prev, y_prev, this.ent_right_mid_x, this.ent_right_mid_y)) {
+//                    r = 500.0;
+//                } else {
+//                    r = -500.0;
+//                }
+//            }
+//            if (hit_goal(x, y)) {
+//                r = 1000.0;
 //            }
 //        }
 //        return r;
@@ -268,15 +286,16 @@
 //        String string_diff = String.format("%.2f", diff);
 //        Double diff_convert= Double.parseDouble(string_diff);
 //        if (this.section == 0) {
-//            Double x1 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-//            Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
-//            Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-//            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff_convert;
+//            Double x4 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
+//            Double x5=theta(ent_left_mid_x,ent_left_mid_y,this.x,this.y);
+//            int dd=20;int aa=1;
+//            s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+diff_convert;
 //        }
 //        if (this.section == 1) {
 //            Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
 //            Double x5=theta(x_goal,y_goal,this.x,this.y);
-//            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a)+"#"+diff_convert;
+//            int dd=20;int aa=1;
+//            s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+diff_convert;
 //        }
 //        if (this.section == 2) {
 //            Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -289,15 +308,16 @@
 //    public String calcStateHalf() {
 //        String s = "";
 //        if (this.section == 0) {
-//            Double x1 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-//            Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
-//            Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-//            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+//            Double x4 = this.dist(this.x, this.y, this.ent_left_mid_x, this.ent_left_mid_y);
+//            Double x5=theta(ent_left_mid_x,ent_left_mid_y,this.x,this.y);
+//            int dd=20;int aa=1;
+//            s = Math.round(x4/dd)+"#"+Math.round(x5/aa);
 //        }
 //        if (this.section == 1) {
 //            Double x4 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
 //            Double x5=theta(x_goal,y_goal,this.x,this.y);
-//            s = Math.round(x4/this.d)+"#"+Math.round(x5/this.a);
+//            int dd=20;int aa=1;
+//            s = Math.round(x4/dd)+"#"+Math.round(x5/aa);
 //        }
 //        if (this.section == 2) {
 //            Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
@@ -312,10 +332,9 @@
 //        ArrayList<Integer> nextpos = new ArrayList<Integer>();
 //        nextpos = this.getNextPos(action, hitBlock);
 //        if (nextpos.get(0)<100) {
-//            Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_left_mid_x,ent_left_mid_y);
-//            Double x2 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
-//            Double x3= findAngle(x_goal,y_goal, nextpos.get(0), nextpos.get(1), ent_left_mid_x,ent_left_mid_y);
-//            nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+//            Double x4 = this.dist(nextpos.get(0), nextpos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
+//            Double x5=theta(this.ent_left_mid_x, this.ent_left_mid_y,nextpos.get(0),nextpos.get(1));
+//            nextstate= Math.round(x4/this.d)+"#"+Math.round(x5/this.a);
 //        }
 //        if (nextpos.get(0)>=100 && nextpos.get(0)<=200) {
 //            Double x4 = this.dist(nextpos.get(0), nextpos.get(1), this.x_goal, this.y_goal);
@@ -366,8 +385,8 @@
 //        Double x2=0.0;
 //        ArrayList<Integer> nextPos = this.getNextPos(action, hitBlock);
 //        if (this.section == 0) {
-//            x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_left_mid_x, this.ent_left_mid_y);
-//            x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
+//            x1=theta(this.ent_left_mid_x,this.ent_left_mid_y,this.x,this.y);
+//            x2=theta(this.ent_left_mid_x,this.ent_left_mid_y,nextPos.get(0),nextPos.get(1));
 //        }
 //        if (this.section == 1) {
 //            x1=theta(this.x_goal,this.y_goal,this.x,this.y);
@@ -415,8 +434,11 @@
 //            for (String k : table.Q0_vals.keySet()) {
 //                if (k.contains(state)){
 //                    ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
-//                    temp = table.Q0_vals.get(k);
-//                    Q.put(k, temp);
+//                    if (table.Q0_vals.get(k).get("val")>0) {
+//                        temp = table.Q0_vals.get(k);
+//                        Q.put(k, temp);
+//                    }
+//
 //                }
 //            }
 //        }
@@ -424,8 +446,10 @@
 //            for (String k : table.Q1_vals.keySet()) {
 //                if (k.contains(state)){
 //                    ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
-//                    temp = table.Q1_vals.get(k);
-//                    Q.put(k, temp);
+//                    if (table.Q1_vals.get(k).get("val")>0) {
+//                        temp = table.Q1_vals.get(k);
+//                        Q.put(k, temp);
+//                    }
 //                }
 //            }
 //        }
@@ -433,8 +457,10 @@
 //            for (String k : table.Q2_vals.keySet()) {
 //                if (k.contains(state)){
 //                    ConcurrentHashMap<String,Double> temp = new ConcurrentHashMap<String,Double>();
-//                    temp = table.Q2_vals.get(k);
-//                    Q.put(k, temp);
+//                    if (table.Q2_vals.get(k).get("val")>0) {
+//                        temp = table.Q2_vals.get(k);
+//                        Q.put(k, temp);
+//                    }
 //                }
 //            }
 //        }
@@ -463,13 +489,13 @@
 //                    case 9:
 //                        this.rand=false;
 //                        if (this.section == 0){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
 //                        }
 //                        if (this.section==1){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
 //                        }
 //                        if (this.section==2){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
 //                        }
 //                }
 //            }
@@ -490,13 +516,13 @@
 //                    case 9:
 //                        this.rand=false;
 //                        if (this.section == 0){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
 //                        }
 //                        if (this.section==1){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
 //                        }
 //                        if (this.section==2){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
 //                        }
 //
 //                        break;
@@ -519,13 +545,13 @@
 //                    case 9:
 //                        this.rand=false;
 //                        if (this.section == 0){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
 //                        }
 //                        if (this.section==1){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
 //                        }
 //                        if (this.section==2){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
 //                        }
 //
 //                        break;
@@ -548,13 +574,13 @@
 //                    case 9:
 //                        this.rand=false;
 //                        if (this.section == 0){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
 //                        }
 //                        if (this.section==1){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
 //                        }
 //                        if (this.section==2){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
 //                        }
 //
 //                        break;
@@ -577,13 +603,13 @@
 //                    case 9:
 //                        this.rand=false;
 //                        if (this.section == 0){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
 //                        }
 //                        if (this.section==1){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
 //                        }
 //                        if (this.section==2){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
 //                        }
 //
 //                        break;
@@ -606,13 +632,13 @@
 //                    case 9:
 //                        this.rand=false;
 //                        if (this.section == 0){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
 //                        }
 //                        if (this.section==1){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
 //                        }
 //                        if (this.section==2){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
 //                        }
 //
 //                        break;
@@ -635,13 +661,13 @@
 //                    case 9:
 //                        this.rand=false;
 //                        if (this.section == 0){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
 //                        }
 //                        if (this.section==1){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
 //                        }
 //                        if (this.section==2){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
 //                        }
 //
 //                        break;
@@ -664,13 +690,13 @@
 //                    case 9:
 //                        this.rand=false;
 //                        if (this.section == 0){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
 //                        }
 //                        if (this.section==1){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
 //                        }
 //                        if (this.section==2){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
 //                        }
 //
 //                        break;
@@ -693,13 +719,13 @@
 //                    case 9:
 //                        this.rand=false;
 //                        if (this.section == 0){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 0,id);
 //                        }
 //                        if (this.section==1){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 1,id);
 //                        }
 //                        if (this.section==2){
-//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2);
+//                            action = table.getAction(state,this.x, this.y, this.x_goal, this. y_goal, 2,id);
 //                        }
 //
 //                        break;
@@ -722,7 +748,7 @@
 //    }
 //    private Boolean hit_goal(int x,int y) {
 //        Boolean hit = false;
-//        if (x == this.x_goal && y == this.y_goal || x == this.x_goal && y == this.y_goal-1||x == this.x_goal && y == this.y_goal+1||x == this.x_goal-1 && y == this.y_goal||x == this.x_goal+1 && y == this.y_goal) {
+//        if (x>=145 && x<=155 && y>=265 && y<=275) {
 //            hit = true;
 //        }
 //        return hit;
@@ -776,6 +802,7 @@
 //            }
 //            ok=!find;
 //        }
+//
 //        return act;
 //    }
 //    private class Results extends TickerBehaviour {
@@ -787,10 +814,16 @@
 //            if (trial<max_trial) {
 //                if (episode<max_episodes) {
 //                    int step_goal = 2000;
-//                    initial();
+//                    if (f==0) {
+//                        f=1;
+//                    }
+//                    else {
+//
+//                        Randominitial(ff);
+//
+//                    }
 //                    for(int i=0;i<max_step;i++) {
 //                        //////////////////////
-//
 //                        /////////////////////
 //                        getDecider(episode);
 //                        section=defineSection();
@@ -800,25 +833,29 @@
 //                        ConcurrentHashMap<String, ConcurrentHashMap<String,Double>>  temp = All_Q_vals(stateHalf);
 //                        if (rand==true && temp.size()>0) {
 //                            if (section == 0){
-//                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 0);
+//                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 0,id);
 //                            }
 //                            if (section==1){
-//                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 1);
+//                                action1 = table.getAction(stateHalf,x, y, x_goal, y_goal, 1,id);
 //                            }
 //                            if (section==2){
-//                                action1 = table.getAction(stateHalf,x, y, x_goal,  y_goal, 2);
+//                                action1 = table.getAction(stateHalf,x, y, x_goal,  y_goal, 2,id);
 //                            }
 //                            action=validate(action,action1,episode);
 //                        }
 //                        if (randloop && randloopcounter<3) {
+//                            prevset=true;
 //                            action=randomActionExcept(actionloop);
+//
 //                            randloopcounter++;
 //                        }
 //                        if (randloop && randloopcounter>=3) {
-//
+//                            prevset=false;
 //                            randloop=false;
+//                            actionsList=new ArrayList<>();
+//                            actionloop=new ArrayList<>();
 //                        }
-//                        System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+trial+"x: "+x+"y "+y+" act "+action);
+//                        System.out.println("Agent "+id+" step "+i+" episode "+episode+" trial "+px+"x: "+x+"y "+y+" act "+action);
 //                        if (inBound(action)) {
 //                            Boolean hitBlock = updatePosition(action,false);
 //                            String state = calcState(action, hitBlock);
@@ -842,36 +879,54 @@
 //
 //                            }
 //                            //////////////////////////
-//                            if (actionsList.size()<4) {
+//                            if (actionsList.size()<=3) {
 //                                actionsList.add(action);
 //                                actionloop.add(action);
 //                            }
 //                            else {
-//                                boolean allEqual = false;
-//                                if (actionsList.get(0)!=actionsList.get(1)) {
-//                                    if (actionsList.get(0)==actionsList.get(2) && actionsList.get(1)==actionsList.get(3)) {
-//                                        allEqual=true;
+//                                if (!prevset) {
+//                                    boolean allEqual = false;
+//                                    if (actionsList.get(0)!=actionsList.get(1)) {
+//                                        if (actionsList.get(0)==actionsList.get(2) && actionsList.get(1)==actionsList.get(3)) {
+//                                            allEqual=true;
+//                                        }
+//                                    }
+//                                    if (allEqual) {
+//                                        randloop=true;
+//                                        randloopcounter=0;
+//
+//                                    }
+//                                    else{
+//                                        actionloop=new ArrayList<>();
+//                                        actionsList=new ArrayList<>();
 //                                    }
 //                                }
-//                                if (allEqual) {
-//                                    randloop=true;
-//                                    randloopcounter=0;
-//
-//                                }
-//                                actionloop=new ArrayList<String>();
-//                                actionsList=new ArrayList<String>();
 //                            }
 //                            //////////////////////////
 //                            String nextpos= nextPosState(action, hitBlock);
 //                            Double diff = diffAngleDouble(action,hitBlock);
 //                            if (section == 0){
-//                                table.update(state,nextpos,reward,diff,section,section_new);
+//                                double sec_table=0.0;
+//                                if(y>105){
+//                                    sec_table=0.0;
+//                                }
+//                                else {
+//                                    sec_table=1.0;
+//                                }
+//                                table.update(state,nextpos,reward,diff,section,section_new,sec_table);
 //                            }
 //                            if (section==1) {
-//                                table.update(state,nextpos,reward,diff,section,section_new);
+//                                double sec_table=0.0;
+//                                if(x>150){
+//                                    sec_table=0.0;
+//                                }
+//                                else {
+//                                    sec_table=1.0;
+//                                }
+//                                table.update(state,nextpos,reward,diff,section,section_new,sec_table);
 //                            }
 //                            if (section==2) {
-//                                table.update(state,nextpos,reward,diff,section,section_new);
+//                                table.update(state,nextpos,reward,diff,section,section_new,0);
 //                            }
 //                        } else {
 //                            String state = calcState(action,true);
@@ -879,13 +934,27 @@
 //                            String nextpos= calcState(action, true);
 //                            Double diff = 0.0;
 //                            if (section == 0){
-//                                table.update(state,nextpos,reward, (diff),section,section);
+//                                double sec_table=0.0;
+//                                if(y>105){
+//                                    sec_table=0.0;
+//                                }
+//                                else {
+//                                    sec_table=1.0;
+//                                }
+//                                table.update(state,nextpos,reward, (diff),section,section,sec_table);
 //                            }
 //                            if (section==1) {
-//                                table.update(state,nextpos,reward, (diff),section,section);
+//                                double sec_table=0.0;
+//                                if(x>150){
+//                                    sec_table=0.0;
+//                                }
+//                                else {
+//                                    sec_table=1.0;
+//                                }
+//                                table.update(state,nextpos,reward, (diff),section,section,sec_table);
 //                            }
 //                            if (section == 2){
-//                                table.update(state,nextpos,reward, (diff),section,section);
+//                                table.update(state,nextpos,reward, (diff),section,section,0);
 //                            }
 //                        }
 //                        ///////////////////////////
@@ -914,17 +983,18 @@
 //                            e.printStackTrace();
 //                        }
 //                        //////////////////////////
-//                        if (hit_goal()) {
+//                        updatePosition(action,true);
+//                        if (hit_goal(x,y)) {
 //                            writer.println("Agent "+id+" hit the goal in episode "+episode +" in step "+i);
 //                            writer.println("Agent "+id+" size table "+table.Q0_vals.size()+" "+table.Q1_vals.size()+" "+table.Q2_vals.size());
 //                            writer.flush();
 //                            step_goal = i;
-//                            initial();
 //                            break;
 //                        }
-//                        updatePosition(action,true);
+//
 //                    }
 //                    episode++;
+//
 //                    avg_step.add(step_goal);
 //                }
 //                if (episode == max_episodes) {
@@ -933,10 +1003,10 @@
 //                    writer.flush();
 //                    episode = 0;
 //                    step =0;
-//                    initial();
+//
 //                    PrintWriter writer1 = null;
 //                    try {
-//                        writer1 = new PrintWriter("Agent"+id+"trial"+(trial-1)+".txt", "UTF-8");
+//                        writer1 = new PrintWriter("Agent"+id+"trial"+(px)+".txt", "UTF-8");
 //                    } catch (FileNotFoundException e) {
 //                        e.printStackTrace();
 //                    } catch (UnsupportedEncodingException e) {
