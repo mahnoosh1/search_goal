@@ -87,13 +87,13 @@ public class Q_table {
             if (this.Q2_vals.containsKey(state)) {
                 Double new_val = this.Q2_vals.get(state).get("val") + alpha*(reward+gamma*MaxQvalueNext(next_state,new_section)- this.Q2_vals.get(state).get("val"));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_convert);val.put("sect", (double) sec_table);
+                val.put("val",new_val);val.put("diff",diff_convert);val.put("sect",  sec_table);
                 this.Q2_vals.replace(state, val);
             }
             else {
                 Double new_val = alpha*(reward+gamma*MaxQvalueNext(next_state,new_section));
                 ConcurrentHashMap<String,Double> val = new ConcurrentHashMap<String,Double>();
-                val.put("val",new_val);val.put("diff",diff_convert);val.put("sect", (double) sec_table);
+                val.put("val",new_val);val.put("diff",diff_convert);val.put("sect",  sec_table);
                 this.Q2_vals.put(state, val);
             }
         }
@@ -275,6 +275,16 @@ public class Q_table {
         x2=theta(ent_left_mid_xx,ent_left_mid_yy,nextPos.get(0),nextPos.get(1));
         return x1-x2;
     }
+    public Double diffAngleDoubleModifiedxx(String action, int x, int y, int x_goal, int y_goal) {
+        Double x1 =0.0;
+        Double x2=0.0;
+        Boolean hit= this.updatePosition(x,y,action,this.move_step);
+        ArrayList<Integer> nextPos = this.getNextPos(x,y,action,hit);
+        x1=theta(ent_right_mid_xx,ent_right_mid_yy,x,y);
+        x2=theta(ent_right_mid_xx,ent_right_mid_yy,nextPos.get(0),nextPos.get(1));
+        return x1-x2;
+    }
+
     public String randomAction() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 4);
         return this.actions.get(randomNum);
@@ -391,15 +401,14 @@ public class Q_table {
                 }
             }
             if(section == 2) {
-                Double diff_temp = this.diffAngleDouble(this.actions.get(i),x,y,x_goal,y_goal,ent_right_mid_xx,ent_right_mid_yy);
+                Double diff_temp = this.diffAngleDoubleModifiedxx(this.actions.get(i),x,y,x_goal,y_goal);
                 Double distance = Math.abs(diff_proper-diff_temp);
                 if (diff_temp == diff_proper) {
                     diff_close = distance;
-                    action=(this.actions.get(i));
-                    break;
+                    actionList.add(this.actions.get(i));
                 }
                 else {
-                    if (distance < diff_close) {
+                    if (distance <= diff_close) {
                         diff_close = distance;
                         action=(this.actions.get(i));
                     }
@@ -438,7 +447,20 @@ public class Q_table {
                     action=actionList.get(1);
                 }
             }
-
+            if(section==2) {
+                Boolean hit1= this.updatePosition(x,y,actionList.get(0),this.move_step);
+                ArrayList<Integer> nextPos1 = this.getNextPos(x,y,actionList.get(0),hit1);
+                Double reward1=this.calcReward(nextPos1.get(0),nextPos1.get(1),x,y,hit1,2);
+                Boolean hit2= this.updatePosition(x,y,actionList.get(1),this.move_step);
+                ArrayList<Integer> nextPos2 = this.getNextPos(x,y,actionList.get(1),hit2);
+                Double reward2=this.calcReward(nextPos2.get(0),nextPos2.get(1),x,y,hit2,2);
+                if (reward1>=reward2) {
+                    action=actionList.get(0);
+                }
+                else{
+                    action=actionList.get(1);
+                }
+            }
         }
         if(section==1) {
             if(id==0 && left_agent.episode>100) {
@@ -507,6 +529,8 @@ public class Q_table {
                     if (tempx.get("val")> Qmax) {
                         Qmax = tempx.get("val");
                         diff_proper = tempx.get("diff");
+                        String ss[] = k.split("#");
+                        act_proper=ss[2];
                         if (diff_proper.isNaN()) {
                             break;
                         }
@@ -566,8 +590,26 @@ public class Q_table {
                     }
                     else {action=act_proper;}
                 }
-                if(section==2) {
-                    action = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp,id);
+                if (section==2) {
+                    if (sect_proper==0.0 && y<=205) {
+                        diff_proper=-1*diff_proper;
+                        if(act_proper=="up") {
+                            action="down";
+                        }
+                        if(act_proper=="down") {
+                            action="up";
+                        }
+                    }
+                    else if (sect_proper==1.0 && y>205) {
+                        diff_proper=-1*diff_proper;
+                        if(act_proper=="up") {
+                            action="down";
+                        }
+                        if(act_proper=="down") {
+                            action="up";
+                        }
+                    }
+                    else {action=act_proper;}
                 }
                 if(section==0) {
                     String action1 = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp,id);
@@ -589,6 +631,18 @@ public class Q_table {
                     Boolean hit2= this.updatePosition(x,y,action,this.move_step);
                     ArrayList<Integer> nextPos2 = this.getNextPos(x,y,action,hit2);
                     Double reward2=this.calcReward(nextPos2.get(0),nextPos2.get(1),x,y,hit2,1);
+                    if(reward1>=reward2) {
+                        action=action1;
+                    }
+                }
+                if(section==2) {
+                    String action1 = this.mapAction(x,y,x_goal,y_goal,section,diff_proper,temp,id);
+                    Boolean hit1= this.updatePosition(x,y,action1,this.move_step);
+                    ArrayList<Integer> nextPos1 = this.getNextPos(x,y,action1,hit1);
+                    Double reward1=this.calcReward(nextPos1.get(0),nextPos1.get(1),x,y,hit1,2);
+                    Boolean hit2= this.updatePosition(x,y,action,this.move_step);
+                    ArrayList<Integer> nextPos2 = this.getNextPos(x,y,action,hit2);
+                    Double reward2=this.calcReward(nextPos2.get(0),nextPos2.get(1),x,y,hit2,2);
                     if(reward1>=reward2) {
                         action=action1;
                     }

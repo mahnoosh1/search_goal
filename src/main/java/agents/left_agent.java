@@ -298,10 +298,10 @@ public class left_agent extends Agent{
             s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+action;
         }
         if (this.section == 2) {
-            Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
-            Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
-            Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
-            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a)+"#"+diff_convert;
+            Double x4 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
+            Double x5=theta(this.ent_right_mid_x, this.ent_right_mid_y,this.x,this.y);
+            int dd=20;int aa=1;
+            s = Math.round(x4/dd)+"#"+Math.round(x5/aa)+"#"+action;
         }
         return s;
     }
@@ -320,10 +320,10 @@ public class left_agent extends Agent{
             s = Math.round(x4/dd)+"#"+Math.round(x5/aa);
         }
         if (this.section == 2) {
-            Double x1 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
-            Double x2 = this.dist(this.x, this.y, this.x_goal, this.y_goal);
-            Double x3 = this.findAngle(this.x_goal, this.y_goal, this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
-            s = Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            Double x4 = this.dist(this.x, this.y, this.ent_right_mid_x, this.ent_right_mid_y);
+            Double x5=theta(this.ent_right_mid_x, this.ent_right_mid_y,this.x,this.y);
+            int dd=20;int aa=1;
+            s = Math.round(x4/dd)+"#"+Math.round(x5/aa);
         }
         return s;
     }
@@ -332,20 +332,22 @@ public class left_agent extends Agent{
         ArrayList<Integer> nextpos = new ArrayList<Integer>();
         nextpos = this.getNextPos(action, hitBlock);
         if (nextpos.get(0)<100) {
+            int dd=20;int aa=1;
             Double x4 = this.dist(nextpos.get(0), nextpos.get(1), this.ent_left_mid_x, this.ent_left_mid_y);
             Double x5=theta(this.ent_left_mid_x, this.ent_left_mid_y,nextpos.get(0),nextpos.get(1));
-            nextstate= Math.round(x4/this.d)+"#"+Math.round(x5/this.a);
+            nextstate= Math.round(x4/dd)+"#"+Math.round(x5/aa);
         }
         if (nextpos.get(0)>=100 && nextpos.get(0)<=200) {
+            int dd=20;int aa=1;
             Double x4 = this.dist(nextpos.get(0), nextpos.get(1), this.x_goal, this.y_goal);
             Double x5=theta(x_goal,y_goal,nextpos.get(0),nextpos.get(1));
-            nextstate= Math.round(x4/this.d)+"#"+Math.round(x5/this.a);
+            nextstate= Math.round(x4/dd)+"#"+Math.round(x5/aa);
         }
         if (nextpos.get(0)>200) {
-            Double x1 = dist(nextpos.get(0), nextpos.get(1),ent_right_mid_x,ent_right_mid_y);
-            Double x2 = dist(nextpos.get(0), nextpos.get(1),x_goal,y_goal);
-            Double x3= findAngle(x_goal,y_goal, nextpos.get(0), nextpos.get(1), ent_right_mid_x,ent_right_mid_y);
-            nextstate=Math.round(x1/this.d)+"#"+Math.round(x2/this.d)+"#"+Math.round(x3/this.a);
+            int dd=20;int aa=1;
+            Double x4 = this.dist(nextpos.get(0), nextpos.get(1), this.ent_right_mid_x, this.ent_right_mid_y);
+            Double x5=theta(this.ent_right_mid_x, this.ent_right_mid_y,nextpos.get(0),nextpos.get(1));
+            nextstate= Math.round(x4/dd)+"#"+Math.round(x5/aa);
         }
         return nextstate;
 
@@ -393,8 +395,8 @@ public class left_agent extends Agent{
             x2=theta(this.x_goal,this.y_goal,nextPos.get(0),nextPos.get(1));
         }
         if (this.section == 2) {
-            x1 = this.findAngle(this.x_goal, this.y_goal, this.x,this.y, this.ent_right_mid_x, this.ent_right_mid_y);
-            x2 = this.findAngle(this.x_goal, this.y_goal, nextPos.get(0),nextPos.get(1), this.ent_right_mid_x, this.ent_right_mid_y);
+            x1=theta(this.ent_right_mid_x,this.ent_right_mid_y,this.x,this.y);
+            x2=theta(this.ent_right_mid_x,this.ent_right_mid_y,nextPos.get(0),nextPos.get(1));
         }
         return x1-x2;
     }
@@ -748,7 +750,7 @@ public class left_agent extends Agent{
     }
     private Boolean hit_goal(int x,int y) {
         Boolean hit = false;
-        if (x>=145 && x<=155 && y>=265 && y<=275) {
+        if (x==x_goal && y==y_goal) {
             hit = true;
         }
         return hit;
@@ -762,7 +764,7 @@ public class left_agent extends Agent{
         Boolean hitBlock1 = updatePosition(action1, false);
         ArrayList<Integer> pos1 = getNextPos(action1,hitBlock1);
         Double reward1 = calcReward(pos1.get(0), pos1.get(1),this.x,this.y,hitBlock1);
-        if (reward1>reward && episode>=25) {
+        if (reward1>reward) {
             ax=action1;//action
         }
         else {
@@ -926,7 +928,14 @@ public class left_agent extends Agent{
                                 table.update(state,nextpos,reward,diff,section,section_new,sec_table);
                             }
                             if (section==2) {
-                                table.update(state,nextpos,reward,diff,section,section_new,0);
+                                double sec_table=0.0;
+                                if(y>205){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.0;
+                                }
+                                table.update(state,nextpos,reward,diff,section,section_new,sec_table);
                             }
                         } else {
                             String state = calcState(action,true);
@@ -954,7 +963,14 @@ public class left_agent extends Agent{
                                 table.update(state,nextpos,reward, (diff),section,section,sec_table);
                             }
                             if (section == 2){
-                                table.update(state,nextpos,reward, (diff),section,section,0);
+                                double sec_table=0.0;
+                                if(y>205){
+                                    sec_table=0.0;
+                                }
+                                else {
+                                    sec_table=1.0;
+                                }
+                                table.update(state,nextpos,reward, (diff),section,section,sec_table);
                             }
                         }
                         ///////////////////////////
