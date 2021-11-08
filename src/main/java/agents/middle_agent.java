@@ -748,7 +748,7 @@ public class middle_agent extends Agent{
     }
     private Boolean hit_goal(int x,int y) {
         Boolean hit = false;
-        if (x == this.x_goal && y == this.y_goal || x == this.x_goal && y == this.y_goal-1||x == this.x_goal && y == this.y_goal+1||x == this.x_goal-1 && y == this.y_goal||x == this.x_goal+1 && y == this.y_goal) {
+        if (x>=145 && x<=155 && y>=265 && y<=275) {
             hit = true;
         }
         return hit;
@@ -983,14 +983,15 @@ public class middle_agent extends Agent{
                             e.printStackTrace();
                         }
                         //////////////////////////
-                        if (hit_goal()) {
+                        updatePosition(action,true);
+                        if (hit_goal(x,y)) {
                             writer.println("Agent "+id+" hit the goal in episode "+episode +" in step "+i);
                             writer.println("Agent "+id+" size table "+table.Q0_vals.size()+" "+table.Q1_vals.size()+" "+table.Q2_vals.size());
                             writer.flush();
                             step_goal = i;
                             break;
                         }
-                        updatePosition(action,true);
+
                     }
                     episode++;
 

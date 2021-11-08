@@ -417,7 +417,7 @@ public class Q_table {
                 Boolean hit2= this.updatePosition(x,y,actionList.get(1),this.move_step);
                 ArrayList<Integer> nextPos2 = this.getNextPos(x,y,actionList.get(1),hit2);
                 Double reward2=this.calcReward(nextPos2.get(0),nextPos2.get(1),x,y,hit2,0);
-                if (reward1<=reward2) {
+                if (reward1>=reward2) {
                     action=actionList.get(0);
                 }
                 else{
@@ -431,7 +431,7 @@ public class Q_table {
                 Boolean hit2= this.updatePosition(x,y,actionList.get(1),this.move_step);
                 ArrayList<Integer> nextPos2 = this.getNextPos(x,y,actionList.get(1),hit2);
                 Double reward2=this.calcReward(nextPos2.get(0),nextPos2.get(1),x,y,hit2,1);
-                if (reward1<=reward2) {
+                if (reward1>=reward2) {
                     action=actionList.get(0);
                 }
                 else{
